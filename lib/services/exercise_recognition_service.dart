@@ -7,7 +7,6 @@ import 'pose_detection_service.dart';
 
 class ExerciseRecognitionService {
   final PoseDetectionService _poseService;
-  static const String PC_IP = '192.168.1.100'; // Update with actual IP
 
   String? confirmedExercise;
   double confidence = 0.0;
@@ -96,7 +95,7 @@ class ExerciseRecognitionService {
   Future<void> sendToAPI(List<List<List<double>>> landmarks) async {
     try {
       final response = await http.post(
-        Uri.parse('http://$PC_IP:5000/classify'),
+        Uri.parse('https://biomechai-server.onrender.com/classify'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'landmarks': landmarks,

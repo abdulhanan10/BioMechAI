@@ -15,14 +15,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _nameCtrl = TextEditingController();
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  final _confirmPassCtrl = TextEditingController();
   final _heightCtrl = TextEditingController();
   final _weightCtrl = TextEditingController();
   final _ageCtrl = TextEditingController();
+  bool _obscurePassword = true;
+  bool _obscureConfirmPassword = true;
   
   String _selectedGoal = 'General Fitness';
   final List<String> _goals = ['Weight Loss', 'Muscle Gain', 'Endurance', 'Flexibility', 'General Fitness'];
 
   Future<void> _register() async {
+    if (_passCtrl.text != _confirmPassCtrl.text) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
+      return;
+    }
     final auth = Provider.of<AuthProvider>(context, listen: false);
     
     double h = double.tryParse(_heightCtrl.text) ?? 170.0;
@@ -78,7 +85,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextField(controller: _emailCtrl, style: const TextStyle(color: AppTheme.text), decoration: const InputDecoration(labelText: 'Email')),
               const SizedBox(height: 16),
-              TextField(controller: _passCtrl, obscureText: true, style: const TextStyle(color: AppTheme.text), decoration: const InputDecoration(labelText: 'Password')),
+              TextField(
+                controller: _passCtrl,
+                obscureText: _obscurePassword,
+                style: const TextStyle(color: AppTheme.text),
+                decoration: InputDecoration(
+                  labelText: 'Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: AppTheme.muted),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _confirmPassCtrl,
+                obscureText: _obscureConfirmPassword,
+                style: const TextStyle(color: AppTheme.text),
+                decoration: InputDecoration(
+                  labelText: 'Confirm Password',
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility, color: AppTheme.muted),
+                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  ),
+                ),
+              ),
               const SizedBox(height: 16),
               
               if (!_isTrainer) ...[

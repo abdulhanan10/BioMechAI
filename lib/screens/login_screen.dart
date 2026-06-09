@@ -13,6 +13,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
+  bool _obscurePassword = true;
 
   Future<void> _login() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
@@ -54,9 +55,34 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextField(
                   controller: _passCtrl,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   style: const TextStyle(color: AppTheme.text),
-                  decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock, color: AppTheme.muted)),
+                  decoration: InputDecoration(
+                    labelText: 'Password', 
+                    prefixIcon: const Icon(Icons.lock, color: AppTheme.muted),
+                    suffixIcon: IconButton(
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: AppTheme.muted),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                    ),
+                  ),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () async {
+                      if (_emailCtrl.text.isEmpty) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your email first')));
+                        return;
+                      }
+                      try {
+                        await auth.resetPassword(_emailCtrl.text.trim());
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset email sent')));
+                      } catch (e) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
+                      }
+                    },
+                    child: const Text('Forgot Password?', style: TextStyle(color: AppTheme.blue)),
+                  ),
                 ),
                 const SizedBox(height: 24),
                 if (auth.error != null)

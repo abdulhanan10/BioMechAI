@@ -70,6 +70,10 @@ class FirebaseService {
     await _auth.signOut();
   }
 
+  Future<void> resetPassword(String email) async {
+    await _auth.sendPasswordResetEmail(email: email);
+  }
+
   // User Data
   Future<UserModel?> getUserData(String uid) async {
     try {
