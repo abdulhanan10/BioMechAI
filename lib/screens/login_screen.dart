@@ -69,18 +69,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Align(
                   alignment: Alignment.centerRight,
                   child: TextButton(
-                    onPressed: () async {
-                      if (_emailCtrl.text.isEmpty) {
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter your email first')));
-                        return;
-                      }
-                      try {
-                        await auth.resetPassword(_emailCtrl.text.trim());
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset email sent')));
-                      } catch (e) {
-                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: ${e.toString()}')));
-                      }
-                    },
+                    onPressed: () => Navigator.pushNamed(context, AppRoutes.forgotPassword),
                     child: const Text('Forgot Password?', style: TextStyle(color: AppTheme.blue)),
                   ),
                 ),

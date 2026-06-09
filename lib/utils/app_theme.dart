@@ -88,4 +88,5 @@ class AppRoutes {
   static const String trainer = '/trainer';
   static const String schedule = '/schedule';
   static const String notifications = '/notifications';
+  static const String forgotPassword = '/forgot-password';
 }

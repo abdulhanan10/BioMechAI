@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 
 import Sidebar from './components/Sidebar';
 import AuthPage from './pages/AuthPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import DashboardHome from './pages/DashboardHome';
 import ClientListPage from './pages/ClientListPage';
 import ClientDetailPage from './pages/ClientDetailPage';
@@ -60,6 +61,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/auth" element={currentUser && !loading ? <Navigate to="/" /> : <AuthPage />} />
+        <Route path="/forgot-password" element={currentUser && !loading ? <Navigate to="/" /> : <ForgotPasswordPage />} />
         
         <Route path="/" element={
           <ProtectedRoute user={currentUser} loading={loading}>

@@ -1,45 +1,26 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { auth, db } from '../firebase';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useNavigate, Link } from 'react-router-dom';
+import { auth } from '../firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Mail, Lock, User, ArrowRight } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 
-export default function AuthPage() {
-  const [isLogin, setIsLogin] = useState(true);
-  
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [msg, setMsg] = useState('');
   
-  const navigate = useNavigate();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(''); setMsg(''); setLoading(true);
 
     try {
-      if (isLogin) {
-        await signInWithEmailAndPassword(auth, email, password);
-        navigate('/');
-      } else {
-        if (!name) throw new Error('Please enter your name.');
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await setDoc(doc(db, 'users', cred.user.uid), {
-          email,
-          name,
-          role: 'user', // default new signups to user
-          createdAt: serverTimestamp()
-        });
-        navigate('/');
-      }
+      if (!email) throw new Error('Please enter your email.');
+      await sendPasswordResetEmail(auth, email);
+      setMsg('Password reset link sent to your email.');
     } catch (err: any) {
-      setError(err.message || 'Authentication failed');
+      setError(err.message || 'Failed to send reset link');
     } finally {
       setLoading(false);
     }
@@ -64,10 +45,10 @@ export default function AuthPage() {
               <img src="/logo.png" alt="BioMechAI Logo" className="w-full h-full object-cover scale-[1.05]" />
             </div>
             <h2 className="text-3xl font-bold text-white tracking-wide">
-              {isLogin ? 'Welcome Back' : 'Create Account'}
+              Reset Password
             </h2>
             <p className="text-gray-400 mt-2 text-sm text-center">
-              {isLogin ? 'Enter your details to access your dashboard' : 'Join BioMechAI to track your fitness journey'}
+              Enter your email to receive a recovery link
             </p>
           </div>
 
@@ -85,46 +66,21 @@ export default function AuthPage() {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <AnimatePresence>
-              {!isLogin && (
-                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="relative">
-                  <User className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                  <input type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-[#00f3ff] focus:shadow-[0_0_15px_rgba(0,243,255,0.2)] outline-none transition-all placeholder:text-gray-500" required />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             <div className="relative">
               <Mail className="absolute left-4 top-3.5 text-gray-400" size={20} />
               <input type="email" placeholder="Email Address" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-[#00f3ff] focus:shadow-[0_0_15px_rgba(0,243,255,0.2)] outline-none transition-all placeholder:text-gray-500" required />
             </div>
 
-            <AnimatePresence>
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="relative">
-                <Lock className="absolute left-4 top-3.5 text-gray-400" size={20} />
-                <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-black/40 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-[#00f3ff] focus:shadow-[0_0_15px_rgba(0,243,255,0.2)] outline-none transition-all placeholder:text-gray-500" required />
-              </motion.div>
-            </AnimatePresence>
-
-            {isLogin && (
-              <div className="flex justify-end">
-                <button type="button" onClick={() => navigate('/forgot-password')} className="text-xs text-[#00f3ff] hover:text-white transition-colors">Forgot Password?</button>
-              </div>
-            )}
-
             <button disabled={loading} type="submit" className="w-full btn-primary py-4 rounded-xl flex items-center justify-center gap-2 mt-4 text-lg disabled:opacity-50">
-              {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
+              {loading ? 'Processing...' : 'Send Link'}
               {!loading && <ArrowRight size={20} />}
             </button>
           </form>
 
           <div className="mt-8 text-center border-t border-white/5 pt-6">
-            <p className="text-sm text-gray-400">
-              {isLogin ? "Don't have an account? " : "Already have an account? "}
-              <button onClick={() => setIsLogin(!isLogin)} className="text-[#00f3ff] font-semibold hover:text-white transition-colors ml-1">
-                {isLogin ? 'Sign Up' : 'Sign In'}
-              </button>
-            </p>
+            <Link to="/auth" className="text-sm text-gray-400 hover:text-white transition-colors">
+              Back to Sign In
+            </Link>
           </div>
 
         </div>
