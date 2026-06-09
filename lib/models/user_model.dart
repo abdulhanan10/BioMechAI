@@ -32,18 +32,34 @@ class UserModel {
   factory UserModel.fromMap(Map<String, dynamic> data, String documentId) {
     return UserModel(
       uid: documentId,
-      email: data['email'] ?? '',
-      name: data['name'] ?? '',
-      heightCm: (data['heightCm'] ?? 0).toDouble(),
-      weightKg: (data['weightKg'] ?? 0).toDouble(),
-      age: data['age'] ?? 0,
-      bmi: (data['bmi'] ?? 0).toDouble(),
-      fitnessGoal: data['fitnessGoal'] ?? '',
-      role: data['role'] ?? 'user',
-      createdAt: data['createdAt'] != null ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
-      streakCount: data['streakCount'] ?? 0,
-      lastActiveDate: data['lastActiveDate'] != null ? (data['lastActiveDate'] as Timestamp).toDate() : null,
+      email: data['email']?.toString() ?? '',
+      name: data['name']?.toString() ?? '',
+      heightCm: _parseDouble(data['heightCm']),
+      weightKg: _parseDouble(data['weightKg']),
+      age: _parseInt(data['age']),
+      bmi: _parseDouble(data['bmi']),
+      fitnessGoal: data['fitnessGoal']?.toString() ?? '',
+      role: data['role']?.toString() ?? 'user',
+      createdAt: data['createdAt'] is Timestamp ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
+      streakCount: _parseInt(data['streakCount']),
+      lastActiveDate: data['lastActiveDate'] is Timestamp ? (data['lastActiveDate'] as Timestamp).toDate() : null,
     );
+  }
+
+  static double _parseDouble(dynamic val) {
+    if (val == null) return 0.0;
+    if (val is double) return val;
+    if (val is int) return val.toDouble();
+    if (val is String) return double.tryParse(val) ?? 0.0;
+    return 0.0;
+  }
+
+  static int _parseInt(dynamic val) {
+    if (val == null) return 0;
+    if (val is int) return val;
+    if (val is double) return val.toInt();
+    if (val is String) return int.tryParse(val) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toMap() {
