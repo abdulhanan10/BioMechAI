@@ -65,8 +65,8 @@ export default function AuthPage() {
         <div className="glass-panel rounded-3xl p-8 shadow-2xl relative overflow-hidden">
           
           <div className="flex flex-col items-center mb-10">
-            <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(0,243,255,0.4)] mb-6 overflow-hidden p-1">
-              <img src="/logo.png" alt="BioMechAI Logo" className="w-full h-full object-contain" />
+            <div className="w-32 h-32 flex items-center justify-center mb-4">
+              <img src="/logo.png" alt="BioMechAI Logo" className="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(0,243,255,0.5)]" />
             </div>
             <h2 className="text-3xl font-bold text-white tracking-wide">
               {isForgotPassword ? 'Reset Password' : isLogin ? 'Welcome Back' : 'Create Account'}

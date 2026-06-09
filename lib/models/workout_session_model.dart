@@ -13,6 +13,7 @@ class SessionModel {
   final DateTime sessionDate;
   final String dayOfWeek;
   final int exerciseCount;
+  final String? trainerFeedback;
 
   SessionModel({
     required this.sessionId,
@@ -27,6 +28,7 @@ class SessionModel {
     required this.sessionDate,
     required this.dayOfWeek,
     required this.exerciseCount,
+    this.trainerFeedback,
   });
 
   factory SessionModel.fromMap(Map<String, dynamic> data, String documentId) {
@@ -43,6 +45,7 @@ class SessionModel {
       sessionDate: data['sessionDate'] != null ? (data['sessionDate'] as Timestamp).toDate() : DateTime.now(),
       dayOfWeek: data['dayOfWeek'] ?? '',
       exerciseCount: data['exerciseCount'] ?? 0,
+      trainerFeedback: data['trainerFeedback'],
     );
   }
 
@@ -60,6 +63,7 @@ class SessionModel {
       'sessionDate': Timestamp.fromDate(sessionDate),
       'dayOfWeek': dayOfWeek,
       'exerciseCount': exerciseCount,
+      if (trainerFeedback != null) 'trainerFeedback': trainerFeedback,
     };
   }
 }
