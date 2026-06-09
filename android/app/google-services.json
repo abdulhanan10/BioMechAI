@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "549717601795",
+    "project_id": "biomechai",
+    "storage_bucket": "biomechai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:549717601795:android:0a310684258003b9fc6836",
+        "android_client_info": {
+          "package_name": "com.example.biomechai"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPc5f827tB-SgYVvbUVVO4DqAl5aW-Ufo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

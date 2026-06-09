@@ -1,0 +1,94 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-cyan: #00f3ff;
+  --color-neon-purple: #9d00ff;
+  --color-dark-bg: #090b10;
+  --color-dark-panel: rgba(18, 22, 33, 0.7);
+  --color-dark-panel-hover: rgba(26, 32, 48, 0.9);
+  
+  --font-sans: 'Inter', system-ui, sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-dark-bg);
+    color: #e2e8f0;
+    font-family: var(--font-sans);
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  /* Custom Scrollbar for sleek dark mode */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: var(--color-dark-panel);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+  
+  .glass-panel-hover {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .glass-panel-hover:hover {
+    background: var(--color-dark-panel-hover);
+    border-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .neon-text-cyan {
+    color: var(--color-neon-cyan);
+    text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+  }
+
+  .neon-border-cyan {
+    border-color: var(--color-neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 243, 255, 0.3);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--color-neon-cyan) 0%, #0088ff 100%);
+    color: #000;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+  }
+  
+  .btn-primary:hover {
+    box-shadow: 0 0 20px rgba(0, 243, 255, 0.4);
+    transform: translateY(-1px);
+  }
+
+  .nav-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 transition-all duration-300;
+  }
+  
+  .nav-link:hover {
+    @apply text-white bg-white/5;
+  }
+  
+  .nav-link.active {
+    @apply text-white bg-white/10 shadow-[0_0_15px_rgba(255,255,255,0.1)];
+    border-left: 3px solid var(--color-neon-cyan);
+  }
+}

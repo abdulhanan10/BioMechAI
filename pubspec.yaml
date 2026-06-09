@@ -1,0 +1,44 @@
+name: biomechai
+description: BioMechAI - AI-powered personal fitness trainer.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.2.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mlkit_pose_detection: ^0.12.0
+  camera: ^0.11.0+2
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.5
+  firebase_messaging: ^14.9.4
+  firebase_storage: ^11.7.7
+  provider: ^6.1.2
+  fl_chart: ^0.68.0
+  http: ^1.2.2
+  uuid: ^4.4.2
+  intl: ^0.19.0
+  shared_preferences: ^2.3.2
+  permission_handler: ^11.3.1
+  cupertino_icons: ^1.0.8
+  table_calendar: ^3.1.2
+  path_provider: ^2.1.4
+  video_player: ^2.11.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.14.2
+
+flutter:
+  uses-material-design: true
+
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: true
+  image_path: "assets/icon.png"
+  min_sdk_android: 21

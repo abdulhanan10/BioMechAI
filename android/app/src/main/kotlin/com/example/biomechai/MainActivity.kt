@@ -1,0 +1,5 @@
+package com.example.biomechai
+
+import io.flutter.embedding.android.FlutterActivity
+
+class MainActivity : FlutterActivity()
