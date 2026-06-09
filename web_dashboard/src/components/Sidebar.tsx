@@ -2,7 +2,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
-import { LayoutDashboard, Users, Settings, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut } from 'lucide-react';
 
 export default function Sidebar() {
   const navigate = useNavigate();
