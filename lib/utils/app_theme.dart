@@ -87,4 +87,5 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String trainer = '/trainer';
   static const String schedule = '/schedule';
+  static const String notifications = '/notifications';
 }

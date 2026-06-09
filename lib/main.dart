@@ -13,6 +13,7 @@ import 'screens/workout_screen.dart';
 import 'screens/history_screen.dart';
 import 'screens/profile_screen.dart';
 import 'screens/trainer_dashboard_screen.dart';
+import 'screens/notifications_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,6 +47,7 @@ class BioMechAIApp extends StatelessWidget {
           AppRoutes.history: (context) => const HistoryScreen(),
           AppRoutes.profile: (context) => const ProfileScreen(),
           AppRoutes.trainer: (context) => const TrainerDashboardScreen(),
+          AppRoutes.notifications: (context) => const NotificationsScreen(),
         },
       ),
     );

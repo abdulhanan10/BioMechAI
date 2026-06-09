@@ -62,6 +62,10 @@ class _HomeScreenState extends State<HomeScreen> {
         title: Text('Hello ${user.name.split(' ').first} 👋'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.notifications_active),
+            onPressed: () => Navigator.pushNamed(context, AppRoutes.notifications),
+          ),
+          IconButton(
             icon: const Icon(Icons.person),
             onPressed: () => Navigator.pushNamed(context, AppRoutes.profile),
           ),
