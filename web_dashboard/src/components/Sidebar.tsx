@@ -15,8 +15,8 @@ export default function Sidebar() {
   return (
     <div className="w-full md:w-64 glass-panel border-r border-white/5 flex flex-col min-h-screen">
       <div className="p-6 border-b border-white/5 flex items-center gap-3">
-        <div className="w-12 h-12 flex items-center justify-center">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(0,243,255,0.4)]" />
+        <div className="w-10 h-10 rounded-full bg-[#090b10] flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.3)] overflow-hidden border border-[#00f3ff]/30">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover scale-[1.05]" />
         </div>
         <h1 className="text-xl font-bold tracking-wider text-white">
           BioMech<span className="text-[#00f3ff]">AI</span>
