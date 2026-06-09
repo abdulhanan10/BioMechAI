@@ -61,14 +61,14 @@ class SessionCard extends StatelessWidget {
                   margin: const EdgeInsets.only(top: 12),
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: AppTheme.primary.withOpacity(0.1),
+                    color: AppTheme.blue.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                    border: Border.all(color: AppTheme.blue.withOpacity(0.3)),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Icon(Icons.feedback_outlined, color: AppTheme.primary, size: 20),
+                      const Icon(Icons.feedback_outlined, color: AppTheme.blue, size: 20),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Column(
@@ -77,7 +77,7 @@ class SessionCard extends StatelessWidget {
                             const Text(
                               'Trainer Feedback',
                               style: TextStyle(
-                                color: AppTheme.primary,
+                                color: AppTheme.blue,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 12,
                               ),
