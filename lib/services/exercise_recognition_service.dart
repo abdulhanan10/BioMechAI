@@ -95,7 +95,7 @@ class ExerciseRecognitionService {
   Future<void> sendToAPI(List<List<List<double>>> landmarks) async {
     try {
       final response = await http.post(
-        Uri.parse('https://biomechai-server.onrender.com/classify'),
+        Uri.parse('https://biomechai.onrender.com/classify'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'landmarks': landmarks,
