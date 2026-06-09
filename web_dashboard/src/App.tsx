@@ -7,8 +7,9 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Sidebar from './components/Sidebar';
 import AuthPage from './pages/AuthPage';
 import DashboardHome from './pages/DashboardHome';
-import LeaderboardPage from './pages/LeaderboardPage';
-import DietPage from './pages/DietPage';
+import ClientListPage from './pages/ClientListPage';
+import ClientDetailPage from './pages/ClientDetailPage';
+import SessionDetailPage from './pages/SessionDetailPage';
 import ProfilePage from './pages/ProfilePage';
 
 // Layout wrapper for authenticated pages
@@ -66,15 +67,21 @@ export default function App() {
           </ProtectedRoute>
         } />
         
-        <Route path="/leaderboard" element={
+        <Route path="/clients" element={
           <ProtectedRoute user={currentUser} loading={loading}>
-            <LeaderboardPage />
+            <ClientListPage />
           </ProtectedRoute>
         } />
         
-        <Route path="/diet" element={
+        <Route path="/client/:uid" element={
           <ProtectedRoute user={currentUser} loading={loading}>
-            <DietPage />
+            <ClientDetailPage />
+          </ProtectedRoute>
+        } />
+
+        <Route path="/session/:sessionId" element={
+          <ProtectedRoute user={currentUser} loading={loading}>
+            <SessionDetailPage />
           </ProtectedRoute>
         } />
         

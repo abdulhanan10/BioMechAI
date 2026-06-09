@@ -2,7 +2,7 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
-import { LayoutDashboard, Trophy, Utensils, Settings, LogOut, Activity } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, Activity } from 'lucide-react';
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -31,14 +31,9 @@ export default function Sidebar() {
           <span>Dashboard</span>
         </NavLink>
         
-        <NavLink to="/leaderboard" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Trophy size={20} />
-          <span>Leaderboard</span>
-        </NavLink>
-        
-        <NavLink to="/diet" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
-          <Utensils size={20} />
-          <span>Nutrition Plans</span>
+        <NavLink to="/clients" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
+          <Users size={20} />
+          <span>Clients</span>
         </NavLink>
         
         <NavLink to="/profile" className={({isActive}) => `nav-link ${isActive ? 'active' : ''}`}>
