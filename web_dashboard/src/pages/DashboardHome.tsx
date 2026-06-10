@@ -14,8 +14,8 @@ export default function DashboardHome() {
   useEffect(() => {
     async function fetchClients() {
       try {
-        // Fetch all users (clients)
-        const q = query(collection(db, 'users'));
+        // Fetch only clients (users with role 'user')
+        const q = query(collection(db, 'users'), where('role', '==', 'user'));
         const snap = await getDocs(q);
         const fetched = snap.docs.map(d => ({ uid: d.id, ...d.data() }));
         setClients(fetched);
