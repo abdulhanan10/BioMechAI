@@ -68,6 +68,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.blue.withOpacity(0.3), width: 2),
+                  boxShadow: [
+                    BoxShadow(color: AppTheme.blue.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
+                  ],
+                  image: const DecorationImage(image: AssetImage('assets/icon.png'), fit: BoxFit.cover),
+                ),
+              ),
+              const SizedBox(height: 12),
+              RichText(
+                text: const TextSpan(
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                  children: [
+                    TextSpan(text: 'BioMech', style: TextStyle(color: Colors.white)),
+                    TextSpan(text: 'AI', style: TextStyle(color: AppTheme.blue)),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [

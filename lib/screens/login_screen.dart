@@ -40,11 +40,32 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.bolt, size: 64, color: AppTheme.blue),
-                const SizedBox(height: 24),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.blue.withOpacity(0.3), width: 2),
+                    boxShadow: [
+                      BoxShadow(color: AppTheme.blue.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
+                    ],
+                    image: const DecorationImage(image: AssetImage('assets/icon.png'), fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                    children: [
+                      TextSpan(text: 'BioMech', style: TextStyle(color: Colors.white)),
+                      TextSpan(text: 'AI', style: TextStyle(color: AppTheme.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
                 const Text(
                   'Welcome Back',
-                  style: TextStyle(color: AppTheme.text, fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppTheme.muted, fontSize: 16),
                 ),
                 const SizedBox(height: 32),
                 TextField(

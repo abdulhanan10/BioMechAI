@@ -61,7 +61,18 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: const [
-              Icon(Icons.bolt, size: 80, color: AppTheme.blue),
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: AppTheme.blue.withOpacity(0.3), width: 2),
+                  boxShadow: [
+                    BoxShadow(color: AppTheme.blue.withOpacity(0.3), blurRadius: 20, spreadRadius: 3)
+                  ],
+                  image: const DecorationImage(image: AssetImage('assets/icon.png'), fit: BoxFit.cover),
+                ),
+              ),
               SizedBox(height: 16),
               Text(
                 'BioMechAI',

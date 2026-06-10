@@ -27,13 +27,33 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       await auth.resetPassword(_emailCtrl.text.trim());
       
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Password reset link sent to your email!'),
-            backgroundColor: AppTheme.green,
-          )
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: AppTheme.card,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            title: const Row(
+              children: [
+                Icon(Icons.check_circle, color: AppTheme.green),
+                SizedBox(width: 8),
+                Text('Email Sent', style: TextStyle(color: Colors.white)),
+              ],
+            ),
+            content: const Text(
+              'A password reset link has been sent to your registered email address.',
+              style: TextStyle(color: AppTheme.text),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context); // Close dialog
+                  Navigator.pop(context); // Go back to login
+                },
+                child: const Text('OK', style: TextStyle(color: AppTheme.blue)),
+              )
+            ],
+          ),
         );
-        Navigator.pop(context); // Go back to login
       }
     } catch (e) {
       if (mounted) {
@@ -68,11 +88,32 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.lock_reset, size: 80, color: AppTheme.blue),
-                const SizedBox(height: 24),
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppTheme.blue.withOpacity(0.3), width: 2),
+                    boxShadow: [
+                      BoxShadow(color: AppTheme.blue.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
+                    ],
+                    image: const DecorationImage(image: AssetImage('assets/icon.png'), fit: BoxFit.cover),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                RichText(
+                  text: const TextSpan(
+                    style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1.5),
+                    children: [
+                      TextSpan(text: 'BioMech', style: TextStyle(color: Colors.white)),
+                      TextSpan(text: 'AI', style: TextStyle(color: AppTheme.blue)),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 8),
                 const Text(
                   'Reset Password',
-                  style: TextStyle(color: AppTheme.text, fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(color: AppTheme.muted, fontSize: 16),
                 ),
                 const SizedBox(height: 12),
                 const Text(
