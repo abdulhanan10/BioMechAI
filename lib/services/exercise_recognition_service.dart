@@ -25,7 +25,7 @@ class ExerciseRecognitionService {
 
   ExerciseRecognitionService(this._poseService);
 
-  List<List<List<double>>> collectLandmarks() {
+  List<List<List<double>>> collectLandmarks(Size imageSize) {
     final buffer = _poseService.landmarkBuffer.toList();
     List<List<List<double>>> result = [];
 
@@ -43,12 +43,8 @@ class ExerciseRecognitionService {
         var lmType = PoseLandmarkType.values.firstWhere((e) => e.index == i, orElse: () => PoseLandmarkType.nose);
         var lm = pose.landmarks[lmType];
         if (lm != null) {
-          // Normalize roughly assuming max dimensions or pass raw coords if API handles normalization
-          // Usually we pass raw or roughly normalized. Let's pass raw coordinates.
-          // Wait, CLAUDE.md says "normalized 0.0-1.0". We need image size to properly normalize, but without it we can normalize by dividing by some max value or max x/y of the frame.
-          // For simplicity in this mock, we just pass the raw coordinates and assume the backend handles or we divide by a standard resolution like 1080x1920.
-          // Let's divide by 1000.0 as a safe fallback if actual dimensions are unknown, but it's better to just pass what MLKit gives.
-          frameData.add([lm.x / 1000.0, lm.y / 1000.0, lm.z / 1000.0]); 
+          // Normalize exact coordinates by width and height to match MediaPipe
+          frameData.add([lm.x / imageSize.width, lm.y / imageSize.height, lm.z / imageSize.width]); 
         } else {
           frameData.add([0.0, 0.0, 0.0]);
         }
@@ -64,7 +60,7 @@ class ExerciseRecognitionService {
     return result;
   }
 
-  void detectFirstRep(Pose pose) {
+  void detectFirstRep(Pose pose, Size imageSize) {
     if (_firstRepDetected) return;
 
     double? kneeAngle = _poseService.jointAngle(
@@ -85,7 +81,7 @@ class ExerciseRecognitionService {
       } else {
         if ((kneeAngle - _initialKneeAngle!).abs() > 40.0) {
           _firstRepDetected = true;
-          _triggerClassification("Squat");
+          _triggerClassification("Squat", imageSize);
         } else if ((elbowAngle - _initialElbowAngle!).abs() > 40.0) {
           _firstRepDetected = true;
           var shoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
@@ -94,12 +90,12 @@ class ExerciseRecognitionService {
             double dy = (shoulder.y - ankle.y).abs();
             double dx = (shoulder.x - ankle.x).abs();
             if (dy < dx) {
-              _triggerClassification("Push-Up");
+              _triggerClassification("Push-Up", imageSize);
             } else {
-              _triggerClassification("Bicep Curl");
+              _triggerClassification("Bicep Curl", imageSize);
             }
           } else {
-            _triggerClassification("Bicep Curl");
+            _triggerClassification("Bicep Curl", imageSize);
           }
         }
       }
@@ -108,8 +104,8 @@ class ExerciseRecognitionService {
     _updateMovementTime(pose);
   }
 
-  void _triggerClassification(String heuristicFallback) async {
-    final landmarks = collectLandmarks();
+  void _triggerClassification(String heuristicFallback, Size imageSize) async {
+    final landmarks = collectLandmarks(imageSize);
     await sendToAPI(landmarks, heuristicFallback);
   }
 

@@ -92,7 +92,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   Future<void> _handleCameraImage(CameraImage image, CameraDescription camera) async {
     final poses = await _poseService.processFrame(image, camera);
     if (poses.isNotEmpty) {
-      _processPoses(poses.first);
+      final Size imageSize = (camera.sensorOrientation == 90 || camera.sensorOrientation == 270)
+          ? Size(image.height.toDouble(), image.width.toDouble())
+          : Size(image.width.toDouble(), image.height.toDouble());
+          
+      _processPoses(poses.first, imageSize);
       if (mounted) {
         setState(() {
           _poses = poses;
@@ -167,9 +171,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     });
   }
 
-  void _processPoses(Pose pose) {
+  void _processPoses(Pose pose, Size imageSize) {
     if (_isDetectingNewExercise) {
-      _recognitionService.detectFirstRep(pose);
+      _recognitionService.detectFirstRep(pose, imageSize);
       if (_recognitionService.confirmedExercise != null) {
         _startExercise(_recognitionService.confirmedExercise!);
       }
