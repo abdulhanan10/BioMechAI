@@ -132,7 +132,7 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-400 mb-2">Contact Number</label>
               <div className="relative">
@@ -146,23 +146,6 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
-
-            {profile.role !== 'trainer' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Primary Fitness Goal</label>
-                <select 
-                  value={profile.fitnessGoal}
-                  onChange={e => setProfile({...profile, fitnessGoal: e.target.value})}
-                  className="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#00f3ff] outline-none transition-all appearance-none"
-                >
-                  <option value="Weight Loss">Weight Loss & Toning</option>
-                  <option value="Muscle Gain">Muscle Gain & Hypertrophy</option>
-                  <option value="Endurance">Endurance & Stamina</option>
-                  <option value="Flexibility">Flexibility & Mobility</option>
-                  <option value="General Fitness">General Fitness</option>
-                </select>
-              </div>
-            )}
           </div>
 
           <div className="pt-6 border-t border-white/5 flex justify-end">
