@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import 'dart:ui';
 import '../models/exercise_block.dart';
 import 'pose_detection_service.dart';
 
