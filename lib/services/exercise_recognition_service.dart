@@ -16,7 +16,8 @@ class ExerciseRecognitionService {
   List<ExerciseBlock> exerciseTimeline = [];
 
   // For detectFirstRep
-  double? _initialPrimaryAngle;
+  double? _initialKneeAngle;
+  double? _initialElbowAngle;
   bool _firstRepDetected = false;
 
   // For detectExerciseChange
@@ -66,20 +67,40 @@ class ExerciseRecognitionService {
   void detectFirstRep(Pose pose) {
     if (_firstRepDetected) return;
 
-    // Use a primary joint like knee for squat or elbow for pushup. We can monitor knee angle generally.
     double? kneeAngle = _poseService.jointAngle(
       pose.landmarks[PoseLandmarkType.leftHip],
       pose.landmarks[PoseLandmarkType.leftKnee],
       pose.landmarks[PoseLandmarkType.leftAnkle]
     );
+    double? elbowAngle = _poseService.jointAngle(
+      pose.landmarks[PoseLandmarkType.leftShoulder],
+      pose.landmarks[PoseLandmarkType.leftElbow],
+      pose.landmarks[PoseLandmarkType.leftWrist]
+    );
 
-    if (kneeAngle != null) {
-      if (_initialPrimaryAngle == null) {
-        _initialPrimaryAngle = kneeAngle;
+    if (kneeAngle != null && elbowAngle != null) {
+      if (_initialKneeAngle == null || _initialElbowAngle == null) {
+        _initialKneeAngle = kneeAngle;
+        _initialElbowAngle = elbowAngle;
       } else {
-        if ((kneeAngle - _initialPrimaryAngle!).abs() > 60.0) {
+        if ((kneeAngle - _initialKneeAngle!).abs() > 40.0) {
           _firstRepDetected = true;
-          _triggerClassification();
+          _triggerClassification("Squat");
+        } else if ((elbowAngle - _initialElbowAngle!).abs() > 40.0) {
+          _firstRepDetected = true;
+          var shoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+          var ankle = pose.landmarks[PoseLandmarkType.leftAnkle];
+          if (shoulder != null && ankle != null) {
+            double dy = (shoulder.y - ankle.y).abs();
+            double dx = (shoulder.x - ankle.x).abs();
+            if (dy < dx) {
+              _triggerClassification("Push-Up");
+            } else {
+              _triggerClassification("Bicep Curl");
+            }
+          } else {
+            _triggerClassification("Bicep Curl");
+          }
         }
       }
     }
@@ -87,12 +108,12 @@ class ExerciseRecognitionService {
     _updateMovementTime(pose);
   }
 
-  void _triggerClassification() async {
+  void _triggerClassification(String heuristicFallback) async {
     final landmarks = collectLandmarks();
-    await sendToAPI(landmarks);
+    await sendToAPI(landmarks, heuristicFallback);
   }
 
-  Future<void> sendToAPI(List<List<List<double>>> landmarks) async {
+  Future<void> sendToAPI(List<List<List<double>>> landmarks, String heuristicFallback) async {
     try {
       final response = await http.post(
         Uri.parse('https://biomechai.onrender.com/classify'),
@@ -110,19 +131,21 @@ class ExerciseRecognitionService {
           confirmedExercise = data['exercise'];
           confidence = score;
           isApiOffline = false;
+        } else {
+          _useFallbackDetection(heuristicFallback);
         }
       } else {
-        _useFallbackDetection();
+        _useFallbackDetection(heuristicFallback);
       }
     } catch (e) {
-      _useFallbackDetection();
+      _useFallbackDetection(heuristicFallback);
     }
   }
 
-  void _useFallbackDetection() {
+  void _useFallbackDetection(String heuristicFallback) {
     isApiOffline = true;
-    confirmedExercise = "Squat"; // Fallback default
-    confidence = 0.70;
+    confirmedExercise = heuristicFallback;
+    confidence = 0.85;
   }
 
   void detectExerciseChange(Pose pose) {
@@ -134,7 +157,8 @@ class ExerciseRecognitionService {
         exerciseChangeDetected = true;
         _poseService.landmarkBuffer.clear();
         _firstRepDetected = false;
-        _initialPrimaryAngle = null;
+        _initialKneeAngle = null;
+        _initialElbowAngle = null;
         confirmedExercise = null;
         _lastMovementTime = DateTime.now(); // reset
       }
@@ -160,7 +184,8 @@ class ExerciseRecognitionService {
     confidence = 0.0;
     exerciseChangeDetected = false;
     _firstRepDetected = false;
-    _initialPrimaryAngle = null;
+    _initialKneeAngle = null;
+    _initialElbowAngle = null;
     _lastMovementTime = null;
   }
 }

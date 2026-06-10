@@ -66,18 +66,39 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) => WeightInputSheet(
-        onSubmit: (weight) {
+        onSubmit: (weight) async {
           setState(() {
             _currentWeight = weight;
           });
           final provider = Provider.of<WorkoutProvider>(context, listen: false);
           if (!provider.isSessionActive) {
             provider.startSession();
-            provider.videoService.startRecording(_cameraController!);
+            if (_cameraController!.value.isStreamingImages) {
+              await _cameraController!.stopImageStream();
+            }
+            final cameras = await availableCameras();
+            final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
+            final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
+            
+            provider.videoService.startRecording(_cameraController!, onAvailable: (image) {
+              _handleCameraImage(image, camera);
+            });
           }
         },
       ),
     );
+  }
+
+  Future<void> _handleCameraImage(CameraImage image, CameraDescription camera) async {
+    final poses = await _poseService.processFrame(image, camera);
+    if (poses.isNotEmpty) {
+      _processPoses(poses.first);
+      if (mounted) {
+        setState(() {
+          _poses = poses;
+        });
+      }
+    }
   }
 
   Future<void> _initCamera() async {
@@ -87,7 +108,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
     _cameraController = CameraController(
       camera,
-      ResolutionPreset.low,
+      ResolutionPreset.high,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.yuv420,
     );
@@ -95,17 +116,10 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     await _cameraController!.initialize();
     if (!mounted) return;
 
-    _cameraController!.startImageStream((image) async {
-      final poses = await _poseService.processFrame(image, camera);
-      if (poses.isNotEmpty) {
-        _processPoses(poses.first);
-        if (mounted) {
-          setState(() {
-            _poses = poses;
-          });
-        }
-      }
-    });
+    final provider = Provider.of<WorkoutProvider>(context, listen: false);
+    if (!provider.isSessionActive) {
+      _cameraController!.startImageStream((image) => _handleCameraImage(image, camera));
+    }
   }
 
   Future<void> _switchCamera() async {
@@ -136,7 +150,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     await _initCamera();
     
     if (wasRecording && _cameraController != null) {
-      provider.videoService.startRecording(_cameraController!);
+      if (_cameraController!.value.isStreamingImages) {
+        await _cameraController!.stopImageStream();
+      }
+      final cameras = await availableCameras();
+      final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
+      final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
+      
+      provider.videoService.startRecording(_cameraController!, onAvailable: (image) {
+        _handleCameraImage(image, camera);
+      });
     }
 
     setState(() {
@@ -257,6 +280,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftKnee],
         pose.landmarks[PoseLandmarkType.leftAnkle]
+      ) ?? 180.0;
+    } else if (exercise == "Push-Up" || exercise == "Bicep Curl") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftElbow],
+        pose.landmarks[PoseLandmarkType.leftWrist]
       ) ?? 180.0;
     }
     return 180.0;

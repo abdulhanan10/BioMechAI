@@ -44,12 +44,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     shape: BoxShape.circle,
                     border: Border.all(color: AppTheme.blue.withOpacity(0.3), width: 2),
                     boxShadow: [
                       BoxShadow(color: AppTheme.blue.withOpacity(0.3), blurRadius: 15, spreadRadius: 2)
                     ],
-                    image: const DecorationImage(image: AssetImage('assets/icon.png'), fit: BoxFit.cover),
+                  ),
+                  child: ClipOval(
+                    child: Image.asset('assets/icon.png', fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 12),
