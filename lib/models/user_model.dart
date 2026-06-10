@@ -10,6 +10,8 @@ class UserModel {
   final double bmi;
   final String fitnessGoal;
   final String role; // 'user' or 'trainer'
+  final String? profilePhotoUrl;
+  final String? contactNumber;
   final DateTime createdAt;
   final int streakCount;
   final DateTime? lastActiveDate;
@@ -24,6 +26,8 @@ class UserModel {
     required this.bmi,
     required this.fitnessGoal,
     required this.role,
+    this.profilePhotoUrl,
+    this.contactNumber,
     required this.createdAt,
     required this.streakCount,
     this.lastActiveDate,
@@ -40,6 +44,8 @@ class UserModel {
       bmi: _parseDouble(data['bmi']),
       fitnessGoal: data['fitnessGoal']?.toString() ?? '',
       role: data['role']?.toString() ?? 'user',
+      profilePhotoUrl: data['profilePhotoUrl']?.toString(),
+      contactNumber: data['contactNumber']?.toString(),
       createdAt: data['createdAt'] is Timestamp ? (data['createdAt'] as Timestamp).toDate() : DateTime.now(),
       streakCount: _parseInt(data['streakCount']),
       lastActiveDate: data['lastActiveDate'] is Timestamp ? (data['lastActiveDate'] as Timestamp).toDate() : null,
@@ -73,6 +79,8 @@ class UserModel {
       'bmi': bmi,
       'fitnessGoal': fitnessGoal,
       'role': role,
+      'profilePhotoUrl': profilePhotoUrl,
+      'contactNumber': contactNumber,
       'createdAt': Timestamp.fromDate(createdAt),
       'streakCount': streakCount,
       'lastActiveDate': lastActiveDate != null ? Timestamp.fromDate(lastActiveDate!) : null,

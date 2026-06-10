@@ -1,10 +1,53 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_theme.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool _isUploading = false;
+  final ImagePicker _picker = ImagePicker();
+
+  Future<void> _pickAndUploadImage(String uid) async {
+    try {
+      final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+      if (image == null) return;
+
+      setState(() => _isUploading = true);
+
+      final storageRef = FirebaseStorage.instance.ref().child('profiles/$uid');
+      final uploadTask = storageRef.putFile(File(image.path));
+      final snapshot = await uploadTask;
+      final downloadUrl = await snapshot.ref.getDownloadURL();
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'profilePhotoUrl': downloadUrl,
+      });
+
+      final auth = Provider.of<AuthProvider>(context, listen: false);
+      await auth.reloadUser();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile photo updated!'), backgroundColor: AppTheme.green));
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to upload image: $e'), backgroundColor: AppTheme.red));
+      }
+    } finally {
+      if (mounted) setState(() => _isUploading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,12 +63,27 @@ class ProfileScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: AppTheme.blue,
-              child: Text(
-                user.name.isNotEmpty ? user.name[0].toUpperCase() : '?',
-                style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold),
+            GestureDetector(
+              onTap: () => _pickAndUploadImage(user.uid),
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: AppTheme.blue,
+                    backgroundImage: user.profilePhotoUrl != null ? NetworkImage(user.profilePhotoUrl!) : null,
+                    child: user.profilePhotoUrl == null 
+                        ? Text(user.name.isNotEmpty ? user.name[0].toUpperCase() : '?', style: const TextStyle(fontSize: 40, color: Colors.white, fontWeight: FontWeight.bold))
+                        : null,
+                  ),
+                  if (_isUploading)
+                    const Positioned.fill(child: CircularProgressIndicator(color: AppTheme.blue)),
+                  Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(color: AppTheme.card, shape: BoxShape.circle, border: Border.all(color: AppTheme.blue, width: 2)),
+                    child: const Icon(Icons.edit, size: 16, color: AppTheme.blue),
+                  ),
+                ],
               ),
             ),
             const SizedBox(height: 16),
@@ -48,8 +106,14 @@ class ProfileScreen extends StatelessWidget {
                   const Divider(color: AppTheme.border, height: 1),
                   _buildInfoRow('BMI', user.bmi.toStringAsFixed(1)),
                   const Divider(color: AppTheme.border, height: 1),
-                  _buildInfoRow('Goal', user.fitnessGoal),
-                  const Divider(color: AppTheme.border, height: 1),
+                  if (user.role != 'trainer') ...[
+                    _buildInfoRow('Goal', user.fitnessGoal),
+                    const Divider(color: AppTheme.border, height: 1),
+                  ],
+                  if (user.contactNumber != null && user.contactNumber!.isNotEmpty) ...[
+                    _buildInfoRow('Contact', user.contactNumber!),
+                    const Divider(color: AppTheme.border, height: 1),
+                  ],
                   _buildInfoRow('Role', user.role.toUpperCase()),
                 ],
               ),

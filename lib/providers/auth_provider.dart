@@ -105,4 +105,14 @@ class AuthProvider extends ChangeNotifier {
     _isLoading = value;
     notifyListeners();
   }
+
+  Future<void> reloadUser() async {
+    if (_currentUser == null) return;
+    try {
+      _currentUser = await _firebaseService.getCurrentUser();
+      notifyListeners();
+    } catch (e) {
+      print('Error reloading user: $e');
+    }
+  }
 }

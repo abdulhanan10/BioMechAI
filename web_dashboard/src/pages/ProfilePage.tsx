@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { db, auth } from '../firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { motion } from 'framer-motion';
-import { User, Mail, Shield, Save } from 'lucide-react';
+import { User, Mail, Shield, Save, Camera, Phone } from 'lucide-react';
 
 export default function ProfilePage() {
-  const [profile, setProfile] = useState<any>({ name: '', email: '', fitnessGoal: 'Weight Loss' });
+  const [profile, setProfile] = useState<any>({ name: '', email: '', fitnessGoal: 'Weight Loss', contactNumber: '', profilePhotoUrl: '', role: 'user' });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -29,6 +30,7 @@ export default function ProfilePage() {
     try {
       await updateDoc(doc(db, 'users', auth.currentUser.uid), {
         name: profile.name,
+        contactNumber: profile.contactNumber,
         fitnessGoal: profile.fitnessGoal
       });
       setMsg('Profile updated successfully!');
@@ -36,6 +38,29 @@ export default function ProfilePage() {
     } catch (err) {
       console.error(err);
       alert('Error updating profile');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0 || !auth.currentUser) return;
+    const file = e.target.files[0];
+    setSaving(true);
+    setMsg('');
+    try {
+      const storageRef = ref(storage, `profiles/${auth.currentUser.uid}`);
+      await uploadBytes(storageRef, file);
+      const url = await getDownloadURL(storageRef);
+      await updateDoc(doc(db, 'users', auth.currentUser.uid), { profilePhotoUrl: url });
+      setProfile({ ...profile, profilePhotoUrl: url });
+      setMsg('Profile photo updated successfully!');
+      setTimeout(() => setMsg(''), 3000);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to upload image');
     } finally {
       setSaving(false);
     }
@@ -53,10 +78,22 @@ export default function ProfilePage() {
       <motion.div variants={containerVariants} initial="hidden" animate="show" className="glass-panel rounded-3xl p-8">
         
         <div className="flex items-center gap-6 mb-10 pb-8 border-b border-white/5">
-          <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#00f3ff] to-[#9d00ff] p-1">
-            <div className="w-full h-full bg-[#090b10] rounded-full flex items-center justify-center overflow-hidden">
-              {profile.name ? <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`} alt="avatar" /> : <User size={40} className="text-gray-500" />}
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#00f3ff] to-[#9d00ff] p-1">
+              <div className="w-full h-full bg-[#090b10] rounded-full flex items-center justify-center overflow-hidden">
+                {profile.profilePhotoUrl ? (
+                  <img src={profile.profilePhotoUrl} alt="avatar" className="w-full h-full object-cover" />
+                ) : profile.name ? (
+                  <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${profile.name}`} alt="avatar" />
+                ) : (
+                  <User size={40} className="text-gray-500" />
+                )}
+              </div>
             </div>
+            <label className="absolute bottom-0 right-0 w-8 h-8 bg-[#161b22] border border-[#00f3ff]/50 rounded-full flex items-center justify-center cursor-pointer hover:bg-[#00f3ff]/20 transition-colors">
+              <Camera size={14} className="text-[#00f3ff]" />
+              <input type="file" className="hidden" accept="image/*" onChange={handleImageUpload} />
+            </label>
           </div>
           <div>
             <h2 className="text-2xl font-bold text-white">{profile.name || 'User'}</h2>
@@ -97,18 +134,37 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-400 mb-2">Primary Fitness Goal</label>
-            <select 
-              value={profile.fitnessGoal}
-              onChange={e => setProfile({...profile, fitnessGoal: e.target.value})}
-              className="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#00f3ff] outline-none transition-all appearance-none"
-            >
-              <option value="Weight Loss">Weight Loss & Toning</option>
-              <option value="Muscle Gain">Muscle Gain & Hypertrophy</option>
-              <option value="Endurance">Endurance & Stamina</option>
-              <option value="Flexibility">Flexibility & Mobility</option>
-            </select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-400 mb-2">Contact Number</label>
+              <div className="relative">
+                <Phone className="absolute left-4 top-3.5 text-gray-500" size={20} />
+                <input 
+                  type="tel" 
+                  value={profile.contactNumber} 
+                  onChange={e => setProfile({...profile, contactNumber: e.target.value})} 
+                  className="w-full bg-black/30 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-[#00f3ff] outline-none transition-all" 
+                  placeholder="+1 (555) 000-0000"
+                />
+              </div>
+            </div>
+
+            {profile.role !== 'trainer' && (
+              <div>
+                <label className="block text-sm font-medium text-gray-400 mb-2">Primary Fitness Goal</label>
+                <select 
+                  value={profile.fitnessGoal}
+                  onChange={e => setProfile({...profile, fitnessGoal: e.target.value})}
+                  className="w-full bg-black/30 border border-white/10 rounded-xl py-3 px-4 text-white focus:border-[#00f3ff] outline-none transition-all appearance-none"
+                >
+                  <option value="Weight Loss">Weight Loss & Toning</option>
+                  <option value="Muscle Gain">Muscle Gain & Hypertrophy</option>
+                  <option value="Endurance">Endurance & Stamina</option>
+                  <option value="Flexibility">Flexibility & Mobility</option>
+                  <option value="General Fitness">General Fitness</option>
+                </select>
+              </div>
+            )}
           </div>
 
           <div className="pt-6 border-t border-white/5 flex justify-end">
