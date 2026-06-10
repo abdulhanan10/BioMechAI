@@ -7,7 +7,8 @@ import '../utils/app_theme.dart';
 import '../widgets/session_card.dart';
 
 class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({Key? key}) : super(key: key);
+  final DateTime? filterDate;
+  const HistoryScreen({Key? key, this.filterDate}) : super(key: key);
 
   @override
   State<HistoryScreen> createState() => _HistoryScreenState();
@@ -30,7 +31,15 @@ class _HistoryScreenState extends State<HistoryScreen> {
       final sessions = await _firebaseService.getRecentSessions(auth.currentUser!.uid, limit: 50);
       if (mounted) {
         setState(() {
-          _sessions = sessions;
+          if (widget.filterDate != null) {
+            _sessions = sessions.where((s) => 
+              s.sessionDate.year == widget.filterDate!.year &&
+              s.sessionDate.month == widget.filterDate!.month &&
+              s.sessionDate.day == widget.filterDate!.day
+            ).toList();
+          } else {
+            _sessions = sessions;
+          }
           _isLoading = false;
         });
       }
@@ -41,7 +50,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.bg,
-      appBar: AppBar(title: const Text('Workout History')),
+      appBar: AppBar(title: Text(widget.filterDate != null ? 'Sessions for ${widget.filterDate!.month}/${widget.filterDate!.day}' : 'Workout History')),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _sessions.isEmpty

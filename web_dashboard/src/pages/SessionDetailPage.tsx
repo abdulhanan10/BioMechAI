@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ArrowLeft, Play, Pause, Send } from 'lucide-react';
+import { ArrowLeft, Play, Pause, Send, CheckCircle } from 'lucide-react';
 
 export default function SessionDetailPage() {
   const { sessionId } = useParams();
@@ -17,6 +17,7 @@ export default function SessionDetailPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -61,10 +62,12 @@ export default function SessionDetailPage() {
       await updateDoc(docRef, {
         trainerFeedback: feedbackText
       });
-      alert('Feedback saved to session!');
+      setToastMessage('Feedback sent to client!');
+      setTimeout(() => setToastMessage(null), 3000);
     } catch (e) {
       console.error(e);
-      alert('Failed to save feedback');
+      setToastMessage('Failed to send feedback');
+      setTimeout(() => setToastMessage(null), 3000);
     }
   };
 
@@ -73,6 +76,13 @@ export default function SessionDetailPage() {
 
   return (
     <div className="p-8">
+      {toastMessage && (
+        <div className="fixed top-6 right-6 z-50 bg-[#090b10]/90 border border-[#00f3ff]/50 text-white px-6 py-4 rounded-xl shadow-[0_0_20px_rgba(0,243,255,0.2)] flex items-center gap-3 backdrop-blur-md transition-all duration-300">
+          <CheckCircle className="text-[#00f3ff]" size={24} />
+          <span className="font-bold">{toastMessage}</span>
+        </div>
+      )}
+
       <button onClick={() => navigate(`/client/${uid}`)} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
         <ArrowLeft size={20} /> Back to Client
       </button>
@@ -116,7 +126,7 @@ export default function SessionDetailPage() {
                 onClick={handleSaveSessionFeedback}
                 className="bg-[#00f3ff] text-black px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:bg-[#00d0fa] transition-colors"
               >
-                Save Feedback <Send size={16} />
+                Send Feedback <Send size={16} />
               </button>
             </div>
           </div>

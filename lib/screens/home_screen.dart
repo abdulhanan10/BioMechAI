@@ -6,6 +6,8 @@ import '../models/workout_session_model.dart';
 import '../utils/app_theme.dart';
 import '../widgets/mini_calendar.dart';
 import '../widgets/session_card.dart';
+import '../services/notification_service.dart';
+import 'history_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _loadData();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      NotificationService().initialize(context);
+    });
   }
 
   Future<void> _loadData() async {
@@ -120,7 +125,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                   const SizedBox(height: 24),
-                  MiniCalendar(activeDates: activeDates),
+                  MiniCalendar(
+                    activeDates: activeDates,
+                    onDaySelected: (date) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HistoryScreen(filterDate: date),
+                        ),
+                      );
+                    },
+                  ),
                   const SizedBox(height: 24),
                   Container(
                     width: double.infinity,

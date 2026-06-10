@@ -41,6 +41,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   // We'll keep track of the exercise block so we can update it
   ExerciseBlock? _currentExerciseBlock;
 
+  bool _isFrontCamera = true;
+  bool _isSwitchingCamera = false;
+
   @override
   void initState() {
     super.initState();
@@ -79,10 +82,11 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
 
   Future<void> _initCamera() async {
     final cameras = await availableCameras();
-    final frontCamera = cameras.firstWhere((c) => c.lensDirection == CameraLensDirection.front, orElse: () => cameras.first);
+    final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
+    final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
 
     _cameraController = CameraController(
-      frontCamera,
+      camera,
       ResolutionPreset.low,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.yuv420,
@@ -92,7 +96,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     if (!mounted) return;
 
     _cameraController!.startImageStream((image) async {
-      final poses = await _poseService.processFrame(image, frontCamera);
+      final poses = await _poseService.processFrame(image, camera);
       if (poses.isNotEmpty) {
         _processPoses(poses.first);
         if (mounted) {
@@ -101,6 +105,42 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           });
         }
       }
+    });
+  }
+
+  Future<void> _switchCamera() async {
+    if (_isSwitchingCamera || _cameraController == null) return;
+    
+    setState(() {
+      _isSwitchingCamera = true;
+    });
+
+    final provider = Provider.of<WorkoutProvider>(context, listen: false);
+    bool wasRecording = _cameraController!.value.isRecordingVideo;
+    
+    if (wasRecording) {
+      await provider.videoService.stopRecording();
+    }
+
+    if (_cameraController!.value.isStreamingImages) {
+      await _cameraController!.stopImageStream();
+    }
+    
+    await _cameraController!.dispose();
+    _cameraController = null;
+
+    setState(() {
+      _isFrontCamera = !_isFrontCamera;
+    });
+
+    await _initCamera();
+    
+    if (wasRecording && _cameraController != null) {
+      provider.videoService.startRecording(_cameraController!);
+    }
+
+    setState(() {
+      _isSwitchingCamera = false;
     });
   }
 
@@ -259,7 +299,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             painter: SkeletonPainter(
               poses: _poses,
               imageSize: Size(_cameraController!.value.previewSize!.height, _cameraController!.value.previewSize!.width),
-              isFront: true,
+              isFront: _isFrontCamera,
               mode: _skeletonMode,
             ),
           ),
@@ -285,22 +325,51 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                     style: const TextStyle(color: AppTheme.text, fontWeight: FontWeight.bold),
                   ),
                 ),
-                FormScoreRing(score: _repCounter.avgScore, size: 50),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.cameraswitch, color: Colors.white, size: 28),
+                      onPressed: _switchCamera,
+                    ),
+                    const SizedBox(width: 8),
+                    FormScoreRing(score: _repCounter.avgScore, size: 50),
+                  ],
+                ),
               ],
             ),
           ),
 
-          // Layer 4: Timer
+          // Layer 4: Timer & REC indicator
           Positioned(
             top: 100,
             right: 16,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(color: AppTheme.red, borderRadius: BorderRadius.circular(12)),
-              child: Text(
-                '${(provider.elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(provider.elapsedSeconds % 60).toString().padLeft(2, '0')}',
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
+            child: Row(
+              children: [
+                if (provider.isSessionActive)
+                  Container(
+                    margin: const EdgeInsets.only(right: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                    decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 10, height: 10,
+                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+                        ),
+                        const SizedBox(width: 6),
+                        const Text('REC', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
+                      ],
+                    ),
+                  ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(color: AppTheme.red, borderRadius: BorderRadius.circular(12)),
+                  child: Text(
+                    '${(provider.elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(provider.elapsedSeconds % 60).toString().padLeft(2, '0')}',
+                    style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
           ),
 

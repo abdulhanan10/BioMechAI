@@ -2,9 +2,9 @@
 import { NavLink, useNavigate } from 'react-router-dom';
 import { auth } from '../firebase';
 import { signOut } from 'firebase/auth';
-import { LayoutDashboard, Users, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Settings, LogOut, X } from 'lucide-react';
 
-export default function Sidebar() {
+export default function Sidebar({ onClose }: { onClose?: () => void }) {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -13,14 +13,21 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="w-full md:w-64 glass-panel border-r border-white/5 flex flex-col min-h-screen">
-      <div className="p-6 border-b border-white/5 flex items-center gap-3">
-        <div className="w-10 h-10 rounded-full bg-[#090b10] flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.3)] overflow-hidden border border-[#00f3ff]/30">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-cover scale-[1.05]" />
+    <div className="w-[280px] md:w-64 glass-panel border-r border-white/5 flex flex-col min-h-screen bg-[#090b10]/95 backdrop-blur-xl">
+      <div className="p-6 border-b border-white/5 flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-full bg-[#090b10] flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.3)] overflow-hidden border border-[#00f3ff]/30">
+            <img src="/logo.png" alt="Logo" className="w-full h-full object-cover scale-[1.05]" />
+          </div>
+          <h1 className="text-xl font-bold tracking-wider text-white">
+            BioMech<span className="text-[#00f3ff]">AI</span>
+          </h1>
         </div>
-        <h1 className="text-xl font-bold tracking-wider text-white">
-          BioMech<span className="text-[#00f3ff]">AI</span>
-        </h1>
+        {onClose && (
+          <button onClick={onClose} className="md:hidden text-gray-400 hover:text-white">
+            <X size={24} />
+          </button>
+        )}
       </div>
       
       <div className="flex-1 p-4 flex flex-col gap-2 mt-4">

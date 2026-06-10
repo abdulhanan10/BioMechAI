@@ -4,10 +4,12 @@ import '../utils/app_theme.dart';
 
 class MiniCalendar extends StatelessWidget {
   final List<DateTime> activeDates;
+  final Function(DateTime)? onDaySelected;
 
   const MiniCalendar({
     Key? key,
     required this.activeDates,
+    this.onDaySelected,
   }) : super(key: key);
 
   @override
@@ -48,6 +50,14 @@ class MiniCalendar extends StatelessWidget {
             shape: BoxShape.circle,
           ),
         ),
+        onDaySelected: (selectedDay, focusedDay) {
+          bool isActive = activeDates.any((d) => 
+            d.year == selectedDay.year && d.month == selectedDay.month && d.day == selectedDay.day
+          );
+          if (isActive && onDaySelected != null) {
+            onDaySelected!(selectedDay);
+          }
+        },
         calendarBuilders: CalendarBuilders(
           markerBuilder: (context, date, events) {
             bool isActive = activeDates.any((d) => 
