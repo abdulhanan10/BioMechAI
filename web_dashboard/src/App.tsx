@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { auth } from './firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -17,6 +17,7 @@ import ProfilePage from './pages/ProfilePage';
 // Layout wrapper for authenticated pages
 function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Close sidebar on navigation on mobile
@@ -28,7 +29,7 @@ function Layout({ children }: { children: React.ReactNode }) {
     <div className="flex flex-col md:flex-row min-h-screen bg-[#090b10] overflow-hidden">
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 glass-panel border-b border-white/5 relative z-30">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
           <div className="w-8 h-8 rounded-full bg-[#090b10] flex items-center justify-center shadow-[0_0_10px_rgba(0,243,255,0.3)] overflow-hidden border border-[#00f3ff]/30">
             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover scale-[1.05]" />
           </div>

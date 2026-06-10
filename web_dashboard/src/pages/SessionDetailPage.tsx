@@ -28,9 +28,6 @@ export default function SessionDetailPage() {
         if (docSnap.exists()) {
           const data = docSnap.data();
           setSession(data);
-          if (data.trainerFeedback) {
-            setFeedbackText(data.trainerFeedback);
-          }
         }
 
         const repsRef = collection(db, 'users', uid, 'workout_sessions', sessionId, 'reps');
@@ -62,6 +59,8 @@ export default function SessionDetailPage() {
       await updateDoc(docRef, {
         trainerFeedback: feedbackText
       });
+      setSession((prev: any) => ({...prev, trainerFeedback: feedbackText}));
+      setFeedbackText('');
       setToastMessage('Feedback sent to client!');
       setTimeout(() => setToastMessage(null), 3000);
     } catch (e) {
@@ -115,10 +114,18 @@ export default function SessionDetailPage() {
           {/* Session Feedback */}
           <div className="glass-panel border border-white/5 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4">Session Feedback (Sent to App)</h3>
+            
+            {session.trainerFeedback && (
+              <div className="mb-6 p-4 bg-[#00f3ff]/10 border border-[#00f3ff]/30 rounded-xl">
+                <p className="text-[#00f3ff] text-sm font-bold mb-1">Previously Sent Feedback:</p>
+                <p className="text-white whitespace-pre-wrap">{session.trainerFeedback}</p>
+              </div>
+            )}
+
             <textarea 
               value={feedbackText}
               onChange={e => setFeedbackText(e.target.value)}
-              placeholder="Write feedback for this entire session. The client will see this in their app..."
+              placeholder="Write new feedback for this entire session. The client will see this in their app..."
               className="w-full bg-[#161b22] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00f3ff] min-h-[100px] resize-y mb-4"
             />
             <div className="flex justify-end">

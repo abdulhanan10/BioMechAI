@@ -15,7 +15,7 @@ export default function Sidebar({ onClose }: { onClose?: () => void }) {
   return (
     <div className="w-[280px] md:w-64 glass-panel border-r border-white/5 flex flex-col min-h-screen bg-[#090b10]/95 backdrop-blur-xl">
       <div className="p-6 border-b border-white/5 flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => { navigate('/'); if (onClose) onClose(); }}>
           <div className="w-10 h-10 rounded-full bg-[#090b10] flex items-center justify-center shadow-[0_0_15px_rgba(0,243,255,0.3)] overflow-hidden border border-[#00f3ff]/30">
             <img src="/logo.png" alt="Logo" className="w-full h-full object-cover scale-[1.05]" />
           </div>
