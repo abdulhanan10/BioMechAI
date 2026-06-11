@@ -97,7 +97,7 @@ def health():
         'status':  'ok',
         'model':   'BioMechAI Custom Classifier',
         'loaded':  model is not None,
-        'exercises': list(le.classes_) if le else []
+        'exercises': list(EXERCISE_DISPLAY_NAMES.values())
     })
 
 

@@ -4,7 +4,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import { collection, getDocs, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ArrowLeft, Video, Activity, PlayCircle } from 'lucide-react';
+import { ArrowLeft, Activity } from 'lucide-react';
 
 export default function ClientDetailPage() {
   const { uid } = useParams();

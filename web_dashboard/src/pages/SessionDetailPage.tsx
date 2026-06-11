@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { collection, doc, getDoc, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { ArrowLeft, Play, Pause, Send, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Send, CheckCircle } from 'lucide-react';
 
 export default function SessionDetailPage() {
   const { sessionId } = useParams();
@@ -13,9 +13,6 @@ export default function SessionDetailPage() {
   const [session, setSession] = useState<any>(null);
   const [reps, setReps] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [feedbackText, setFeedbackText] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -43,15 +40,6 @@ export default function SessionDetailPage() {
     };
     fetchData();
   }, [uid, sessionId]);
-
-  const togglePlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) videoRef.current.pause();
-      else videoRef.current.play();
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   const handleSaveSessionFeedback = async () => {
     if (!feedbackText.trim() || !uid || !sessionId) return;
     try {
