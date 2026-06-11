@@ -93,7 +93,7 @@ class ExerciseRecognitionService {
           'landmarks': landmarks,
           'fps': 30
         }),
-      ).timeout(const Duration(seconds: 3));
+      ).timeout(const Duration(seconds: 45));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -103,13 +103,27 @@ class ExerciseRecognitionService {
           confidence = score;
           isApiOffline = false;
         } else {
-          _useFallbackDetection(heuristicFallback);
+          // If low confidence, clear buffer and allow retry instead of locking in
+          _poseService.landmarkBuffer.clear();
+          _firstRepDetected = false;
         }
       } else {
-        _useFallbackDetection(heuristicFallback);
+        // If server error, clear buffer to allow retry
+        _poseService.landmarkBuffer.clear();
+        _firstRepDetected = false;
       }
     } catch (e) {
-      _useFallbackDetection(heuristicFallback);
+      // If timeout or network error, clear buffer to allow retry
+      _poseService.landmarkBuffer.clear();
+      _firstRepDetected = false;
+    }
+  }
+
+  void pingAPI() {
+    try {
+      http.get(Uri.parse(apiUrl.replaceAll('/classify', '/health'))).timeout(const Duration(seconds: 5)).catchError((_) => http.Response('', 500));
+    } catch (e) {
+      // ignore
     }
   }
 
@@ -149,6 +163,7 @@ class ExerciseRecognitionService {
   }
 
   void reset() {
+    pingAPI(); // Wake up Render
     exerciseTimeline.clear();
     _poseService.landmarkBuffer.clear();
     confirmedExercise = null;
