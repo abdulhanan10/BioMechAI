@@ -158,7 +158,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         
         // Count rep
         double primaryAngle = _getPrimaryAngle(pose, _recognitionService.confirmedExercise!);
-        bool repCompleted = _repCounter.update(primaryAngle, result.isValid, result.score);
+        bool repCompleted = _repCounter.update(primaryAngle, result.isValid, result.score, _recognitionService.confirmedExercise!);
 
         if (mounted) {
           setState(() {

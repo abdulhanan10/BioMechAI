@@ -71,9 +71,9 @@ class ExerciseRecognitionService {
 
     _updateMovementTime(pose);
 
-    // Trigger classification once we have collected at least 45 frames (approx 1.5 seconds)
+    // Trigger classification once we have collected at least 90 frames (approx 3 seconds)
     // This allows the custom model to identify ANY exercise, not just squats/pushups.
-    if (_poseService.landmarkBuffer.length >= 45) {
+    if (_poseService.landmarkBuffer.length >= 90) {
       _firstRepDetected = true;
       _triggerClassification("Custom Exercise", imageSize);
     }

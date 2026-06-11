@@ -142,11 +142,26 @@ class RepCounterService {
   double avgScore = 0;
   List<dynamic> repHistory = [];
 
-  bool update(double angle, bool isValid, double score) {
+  bool update(double angle, bool isValid, double score, String exercise) {
     bool repCompleted = false;
-    if (_state == 'up' && angle < 112) {
+    
+    // Quick rep counting thresholds tailored to exercise
+    double downThresh = 135;
+    double upThresh = 155;
+    
+    if (exercise == 'Jumping Jack') {
+        downThresh = 60; // Arms go down
+        upThresh = 120;  // Arms go up
+    } else if (exercise == 'Push-Up' || exercise == 'Bicep Curl') {
+        downThresh = 120;
+        upThresh = 150;
+    } else if (exercise == 'Plank') {
+        return false; // Planks are held, not counted in reps
+    }
+    
+    if (_state == 'up' && angle < downThresh) {
       _state = 'down';
-    } else if (_state == 'down' && angle > 148) {
+    } else if (_state == 'down' && angle > upThresh) {
       _state = 'up';
       repCompleted = true;
       totalReps++;

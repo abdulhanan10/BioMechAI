@@ -44,7 +44,9 @@ class SessionCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${session.exerciseCount} exercises • ${session.totalReps} total reps',
+                          session.exerciseNames.isNotEmpty 
+                            ? session.exerciseNames.join(', ')
+                            : '${session.exerciseCount} exercises • ${session.totalReps} total reps',
                           style: const TextStyle(
                             color: AppTheme.muted,
                             fontSize: 14,

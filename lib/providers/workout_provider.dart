@@ -95,6 +95,7 @@ class WorkoutProvider extends ChangeNotifier {
         sessionDate: now,
         dayOfWeek: _getDayOfWeek(now),
         exerciseCount: exerciseTimeline.length,
+        exerciseNames: exerciseTimeline.map((e) => e.exerciseName).toSet().toList(),
       );
 
       await _firebaseService.saveWorkoutSession(session);

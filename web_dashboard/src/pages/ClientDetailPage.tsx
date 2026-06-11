@@ -114,7 +114,7 @@ export default function ClientDetailPage() {
                     <div className="flex justify-between items-center mb-4">
                       <div>
                         <div className="text-lg font-bold text-white">{session.sessionDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                        <div className="text-sm text-gray-400">{session.totalDuration} seconds • {session.exerciseCount} exercises</div>
+                        <div className="text-sm text-gray-400">{session.totalDuration} seconds • {session.exerciseNames?.length > 0 ? session.exerciseNames.join(', ') : session.exerciseCount + ' exercises'}</div>
                       </div>
                       <div className="text-right">
                         <div className="text-sm text-gray-400">Avg Form Score</div>

@@ -13,6 +13,7 @@ class SessionModel {
   final DateTime sessionDate;
   final String dayOfWeek;
   final int exerciseCount;
+  final List<String> exerciseNames;
   final String? trainerFeedback;
 
   SessionModel({
@@ -28,6 +29,7 @@ class SessionModel {
     required this.sessionDate,
     required this.dayOfWeek,
     required this.exerciseCount,
+    this.exerciseNames = const [],
     this.trainerFeedback,
   });
 
@@ -45,6 +47,7 @@ class SessionModel {
       sessionDate: data['sessionDate'] != null ? (data['sessionDate'] as Timestamp).toDate() : DateTime.now(),
       dayOfWeek: data['dayOfWeek'] ?? '',
       exerciseCount: data['exerciseCount'] ?? 0,
+      exerciseNames: List<String>.from(data['exerciseNames'] ?? []),
       trainerFeedback: data['trainerFeedback'],
     );
   }
@@ -63,6 +66,7 @@ class SessionModel {
       'sessionDate': Timestamp.fromDate(sessionDate),
       'dayOfWeek': dayOfWeek,
       'exerciseCount': exerciseCount,
+      'exerciseNames': exerciseNames,
       if (trainerFeedback != null) 'trainerFeedback': trainerFeedback,
     };
   }

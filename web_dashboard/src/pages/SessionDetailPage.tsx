@@ -130,7 +130,7 @@ export default function SessionDetailPage() {
                     </span>
                   </td>
                   <td className="py-4 text-gray-400 text-sm">
-                    {rep.errorsDetected?.length > 0 ? rep.errorsDetected.join(', ') : 'None'}
+                    {rep.errorsDetected?.length > 0 ? rep.errorsDetected.join(', ') : (!rep.isValid ? 'Poor form' : 'None')}
                   </td>
                 </tr>
               ))}
