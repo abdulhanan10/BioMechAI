@@ -37,7 +37,7 @@ export default function DashboardHome() {
   const handleSelectClient = async (client: any) => {
     setSelectedClient(client);
     try {
-      const q = query(collection(db, 'sessions'), where('userId', '==', client.uid));
+      const q = collection(db, 'users', client.uid, 'workout_sessions');
       const snap = await getDocs(q);
       const fetchedSessions = snap.docs.map(d => ({ id: d.id, ...d.data() }))
         .sort((a:any, b:any) => new Date(a.sessionDate).getTime() - new Date(b.sessionDate).getTime());

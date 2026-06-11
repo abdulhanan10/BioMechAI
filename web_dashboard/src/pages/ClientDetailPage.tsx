@@ -29,7 +29,7 @@ export default function ClientDetailPage() {
           // handle Firestore Timestamp
           const sessionDate = data.sessionDate?.toDate ? data.sessionDate.toDate() : new Date(data.sessionDate);
           return { id: doc.id, ...data, sessionDate };
-        });
+        }).sort((a, b) => b.sessionDate.getTime() - a.sessionDate.getTime());
         setSessions(fetchedSessions);
       } catch (error) {
         console.error("Error fetching data:", error);
