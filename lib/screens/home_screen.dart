@@ -84,46 +84,22 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppTheme.card2,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppTheme.border),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Streak', style: TextStyle(color: AppTheme.muted)),
-                              const SizedBox(height: 8),
-                              Text('🔥 ${user.streakCount} days', style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: AppTheme.card2,
-                            borderRadius: BorderRadius.circular(16),
-                            border: Border.all(color: AppTheme.border),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text('Today', style: TextStyle(color: AppTheme.muted)),
-                              const SizedBox(height: 8),
-                              Text('${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length} sessions', style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.card2,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppTheme.border),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text('Today', style: TextStyle(color: AppTheme.muted)),
+                        const SizedBox(height: 8),
+                        Text('${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length} sessions', style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 24),
                   MiniCalendar(

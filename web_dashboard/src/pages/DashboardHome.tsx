@@ -106,7 +106,7 @@ export default function DashboardHome() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <motion.div variants={itemVariants} className="glass-panel glass-panel-hover p-6 rounded-2xl relative overflow-hidden">
           <div className="absolute -right-4 -top-4 text-white/5"><Activity size={100} /></div>
           <div className="flex items-center gap-4 mb-4">
@@ -132,15 +132,6 @@ export default function DashboardHome() {
             <h3 className="text-gray-400 font-medium">Total Valid Reps</h3>
           </div>
           <p className="text-4xl font-bold text-white">{totalValidReps}</p>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="glass-panel glass-panel-hover p-6 rounded-2xl relative overflow-hidden">
-          <div className="absolute -right-4 -top-4 text-white/5"><Award size={100} /></div>
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400"><Award size={24} /></div>
-            <h3 className="text-gray-400 font-medium">Current Streak</h3>
-          </div>
-          <p className="text-4xl font-bold text-white">{streak} <span className="text-xl text-gray-500">Days</span></p>
         </motion.div>
       </div>
 
