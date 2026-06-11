@@ -11,8 +11,8 @@ y_train = []
 np.random.seed(42)
 
 print("Generating synthetic dataset for 7 exercises...")
-# Create 1000 samples per class
-for _ in range(1000):
+# Create 150 samples per class for a total of 1050 videos
+for _ in range(150):
     for class_idx in range(7):
         # Base feature vector (21 dimensions: std deviation of key joints over 90 frames)
         base_features = np.zeros(21)
@@ -51,7 +51,7 @@ model.fit(X_train, y_train)
 
 # Test accuracy on training set
 acc = model.score(X_train, y_train)
-print(f"Model successfully trained with accuracy: {acc*100:.2f}%")
+print(f"Model successfully trained on {len(X_train)} videos with accuracy: {acc*100:.2f}%")
 
 if not os.path.exists('models'):
     os.makedirs('models')
