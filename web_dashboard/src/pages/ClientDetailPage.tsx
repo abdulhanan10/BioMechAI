@@ -119,7 +119,7 @@ export default function ClientDetailPage() {
                       <div className="text-right">
                         <div className="text-sm text-gray-400">Avg Form Score</div>
                         <div className={`text-xl font-bold ${session.avgFormScore >= 80 ? 'text-green-400' : session.avgFormScore >= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                          {Math.round(session.avgFormScore)}
+                          {Math.floor(session.avgFormScore)}
                         </div>
                       </div>
                     </div>

@@ -50,7 +50,7 @@ export default function DashboardHome() {
   };
 
   const totalValidReps = sessions.reduce((acc, s) => acc + (s.totalValidReps || 0), 0);
-  const avgScore = sessions.length > 0 ? (sessions.reduce((acc, s) => acc + (s.avgFormScore || 0), 0) / sessions.length).toFixed(1) : "0.0";
+  const avgScore = sessions.length > 0 ? Math.floor(sessions.reduce((acc, s) => acc + (s.avgFormScore || 0), 0) / sessions.length).toFixed(1) : "0.0";
   const streak = Math.min(sessions.length, 7); // Mock streak
 
   const chartData = sessions.slice(-10).map((s, i) => ({
@@ -145,7 +145,8 @@ export default function DashboardHome() {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      {/* Charts */}
+      <div className="grid grid-cols-1 gap-8">
         <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl">
           <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
             <div className="w-2 h-6 bg-[#00f3ff] rounded-full"></div>
@@ -166,32 +167,6 @@ export default function DashboardHome() {
                   <YAxis stroke="#8b949e" domain={[0, 100]} tickLine={false} axisLine={false} />
                   <Tooltip contentStyle={{ backgroundColor: 'rgba(18,22,33,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }} />
                   <Area type="monotone" dataKey="score" stroke="#00f3ff" strokeWidth={3} fillOpacity={1} fill="url(#colorScore)" />
-                </AreaChart>
-              </ResponsiveContainer>
-            ) : <div className="h-full flex items-center justify-center text-gray-500">No session data yet for this user.</div>}
-          </div>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <div className="w-2 h-6 bg-purple-500 rounded-full"></div>
-            Repetition Volume
-          </h3>
-          <div className="h-72">
-            {chartData.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData}>
-                  <defs>
-                    <linearGradient id="colorReps" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#a855f7" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#a855f7" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis dataKey="name" stroke="#8b949e" tickLine={false} axisLine={false} />
-                  <YAxis stroke="#8b949e" tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: 'rgba(18,22,33,0.9)', borderColor: 'rgba(255,255,255,0.1)', borderRadius: '12px' }} />
-                  <Area type="monotone" dataKey="reps" stroke="#a855f7" strokeWidth={3} fillOpacity={1} fill="url(#colorReps)" />
                 </AreaChart>
               </ResponsiveContainer>
             ) : <div className="h-full flex items-center justify-center text-gray-500">No session data yet for this user.</div>}

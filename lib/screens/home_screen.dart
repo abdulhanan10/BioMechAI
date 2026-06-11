@@ -8,6 +8,7 @@ import '../widgets/mini_calendar.dart';
 import '../widgets/session_card.dart';
 import '../services/notification_service.dart';
 import 'history_screen.dart';
+import 'session_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -191,7 +192,17 @@ class _HomeScreenState extends State<HomeScreen> {
                   if (_recentSessions.isEmpty)
                     const Center(child: Padding(padding: EdgeInsets.all(24), child: Text('No recent sessions', style: TextStyle(color: AppTheme.muted))))
                   else
-                    ..._recentSessions.take(5).map((s) => SessionCard(session: s)).toList(),
+                    ..._recentSessions.take(5).map((s) => SessionCard(
+                      session: s,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SessionDetailScreen(session: s),
+                          ),
+                        );
+                      },
+                    )).toList(),
                 ],
               ),
             ),

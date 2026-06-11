@@ -126,7 +126,7 @@ export default function SessionDetailPage() {
                   </td>
                   <td className="py-4 text-white">
                     <span className={`px-2 py-1 rounded-full text-xs font-bold ${rep.formScore >= 80 ? 'bg-green-500/20 text-green-400' : rep.formScore >= 60 ? 'bg-yellow-500/20 text-yellow-400' : 'bg-red-500/20 text-red-400'}`}>
-                      {Math.round(rep.formScore)}
+                      {Math.floor(rep.formScore)}
                     </span>
                   </td>
                   <td className="py-4 text-gray-400 text-sm">

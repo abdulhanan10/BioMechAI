@@ -5,6 +5,7 @@ import '../services/firebase_service.dart';
 import '../models/workout_session_model.dart';
 import '../utils/app_theme.dart';
 import '../widgets/session_card.dart';
+import 'session_detail_screen.dart';
 
 class HistoryScreen extends StatefulWidget {
   final DateTime? filterDate;
@@ -59,7 +60,18 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   padding: const EdgeInsets.all(16),
                   itemCount: _sessions.length,
                   itemBuilder: (context, index) {
-                    return SessionCard(session: _sessions[index]);
+                    final s = _sessions[index];
+                    return SessionCard(
+                      session: s,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SessionDetailScreen(session: s),
+                          ),
+                        );
+                      },
+                    );
                   },
                 ),
     );
