@@ -6,14 +6,16 @@ class VideoRecordingService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   CameraController? _cameraController;
 
-  void startRecording(CameraController controller, {void Function(CameraImage)? onAvailable}) async {
-    if (controller.value.isRecordingVideo) return;
+  Future<bool> startRecording(CameraController controller, {void Function(CameraImage)? onAvailable}) async {
+    if (controller.value.isRecordingVideo) return true;
     _cameraController = controller;
     
     try {
       await _cameraController!.startVideoRecording(onAvailable: onAvailable);
+      return true;
     } on CameraException catch (e) {
       print('Error starting video recording: $e');
+      return false;
     }
   }
 

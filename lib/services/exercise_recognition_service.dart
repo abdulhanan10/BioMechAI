@@ -9,6 +9,11 @@ import 'pose_detection_service.dart';
 class ExerciseRecognitionService {
   final PoseDetectionService _poseService;
 
+  // Change this to your local IP address (e.g., 'http://192.168.1.5:5000/classify')
+  // For Android Emulator, use 'http://10.0.2.2:5000/classify'
+  // For testing the deployed app, use 'https://biomechai.onrender.com/classify'
+  static const String apiUrl = 'https://biomechai.onrender.com/classify';
+
   String? confirmedExercise;
   double confidence = 0.0;
   bool isApiOffline = false;
@@ -64,45 +69,14 @@ class ExerciseRecognitionService {
   void detectFirstRep(Pose pose, Size imageSize) {
     if (_firstRepDetected) return;
 
-    double? kneeAngle = _poseService.jointAngle(
-      pose.landmarks[PoseLandmarkType.leftHip],
-      pose.landmarks[PoseLandmarkType.leftKnee],
-      pose.landmarks[PoseLandmarkType.leftAnkle]
-    );
-    double? elbowAngle = _poseService.jointAngle(
-      pose.landmarks[PoseLandmarkType.leftShoulder],
-      pose.landmarks[PoseLandmarkType.leftElbow],
-      pose.landmarks[PoseLandmarkType.leftWrist]
-    );
-
-    if (kneeAngle != null && elbowAngle != null) {
-      if (_initialKneeAngle == null || _initialElbowAngle == null) {
-        _initialKneeAngle = kneeAngle;
-        _initialElbowAngle = elbowAngle;
-      } else {
-        if ((kneeAngle - _initialKneeAngle!).abs() > 40.0) {
-          _firstRepDetected = true;
-          _triggerClassification("Squat", imageSize);
-        } else if ((elbowAngle - _initialElbowAngle!).abs() > 40.0) {
-          _firstRepDetected = true;
-          var shoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
-          var ankle = pose.landmarks[PoseLandmarkType.leftAnkle];
-          if (shoulder != null && ankle != null) {
-            double dy = (shoulder.y - ankle.y).abs();
-            double dx = (shoulder.x - ankle.x).abs();
-            if (dy < dx) {
-              _triggerClassification("Push-Up", imageSize);
-            } else {
-              _triggerClassification("Bicep Curl", imageSize);
-            }
-          } else {
-            _triggerClassification("Bicep Curl", imageSize);
-          }
-        }
-      }
-    }
-    
     _updateMovementTime(pose);
+
+    // Trigger classification once we have collected at least 45 frames (approx 1.5 seconds)
+    // This allows the custom model to identify ANY exercise, not just squats/pushups.
+    if (_poseService.landmarkBuffer.length >= 45) {
+      _firstRepDetected = true;
+      _triggerClassification("Custom Exercise", imageSize);
+    }
   }
 
   void _triggerClassification(String heuristicFallback, Size imageSize) async {
@@ -113,7 +87,7 @@ class ExerciseRecognitionService {
   Future<void> sendToAPI(List<List<List<double>>> landmarks, String heuristicFallback) async {
     try {
       final response = await http.post(
-        Uri.parse('https://biomechai.onrender.com/classify'),
+        Uri.parse(apiUrl),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'landmarks': landmarks,

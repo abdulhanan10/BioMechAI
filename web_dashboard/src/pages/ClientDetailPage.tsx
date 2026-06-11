@@ -127,18 +127,9 @@ export default function ClientDetailPage() {
                     <div className="flex gap-3 mt-4 pt-4 border-t border-white/5">
                       <button 
                         onClick={() => navigate(`/session/${session.id}?uid=${uid}`)}
-                        className="flex-1 bg-white/5 hover:bg-white/10 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
+                        className="w-full bg-white/5 hover:bg-white/10 text-white py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                       >
                         <Activity size={16} /> View Analysis
-                      </button>
-                      
-                      <button 
-                        onClick={() => navigate(`/session/${session.id}?uid=${uid}&play=true`)}
-                        disabled={!session.videoUrl}
-                        className={`flex-1 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm ${session.videoUrl ? 'bg-[#00f3ff]/10 text-[#00f3ff] hover:bg-[#00f3ff]/20' : 'bg-white/5 text-gray-600 cursor-not-allowed'}`}
-                      >
-                        {session.videoUrl ? <PlayCircle size={16} /> : <Video size={16} />} 
-                        {session.videoUrl ? 'Play Video' : 'No Video'}
                       </button>
                     </div>
                   </div>

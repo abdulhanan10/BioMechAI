@@ -87,30 +87,7 @@ export default function SessionDetailPage() {
       </button>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Video Player */}
         <div className="space-y-6">
-          <div className="glass-panel border border-white/5 rounded-2xl overflow-hidden relative group">
-            {session.videoUrl ? (
-              <>
-                <video 
-                  ref={videoRef}
-                  src={session.videoUrl} 
-                  className="w-full h-auto aspect-video object-cover"
-                  controls={false}
-                />
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <button onClick={togglePlay} className="w-16 h-16 bg-[#00f3ff] rounded-full flex items-center justify-center text-black hover:scale-110 transition-transform">
-                    {isPlaying ? <Pause size={30} fill="currentColor" /> : <Play size={30} fill="currentColor" className="ml-1" />}
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="w-full aspect-video flex items-center justify-center bg-[#161b22] text-gray-500">
-                No video recorded for this session
-              </div>
-            )}
-          </div>
-
           {/* Session Feedback */}
           <div className="glass-panel border border-white/5 rounded-2xl p-6">
             <h3 className="text-white font-bold mb-4">Session Feedback (Sent to App)</h3>

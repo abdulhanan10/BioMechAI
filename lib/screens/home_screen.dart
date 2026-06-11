@@ -33,7 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadData() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
     if (auth.currentUser != null) {
-      final sessions = await _firebaseService.getRecentSessions(auth.currentUser!.uid);
+      final sessions = await _firebaseService.getRecentSessions(auth.currentUser!.uid, limit: 365);
       if (mounted) {
         setState(() {
           _recentSessions = sessions;

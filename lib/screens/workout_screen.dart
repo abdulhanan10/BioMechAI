@@ -74,16 +74,12 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           final provider = Provider.of<WorkoutProvider>(context, listen: false);
           if (!provider.isSessionActive) {
             provider.startSession();
-            if (_cameraController!.value.isStreamingImages) {
-              await _cameraController!.stopImageStream();
+            if (!_cameraController!.value.isStreamingImages) {
+              final cameras = await availableCameras();
+              final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
+              final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
+              _cameraController!.startImageStream((image) => _handleCameraImage(image, camera));
             }
-            final cameras = await availableCameras();
-            final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
-            final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
-            
-            provider.videoService.startRecording(_cameraController!, onAvailable: (image) {
-              _handleCameraImage(image, camera);
-            });
           }
         },
       ),
@@ -121,10 +117,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     await _cameraController!.initialize();
     if (!mounted) return;
 
-    final provider = Provider.of<WorkoutProvider>(context, listen: false);
-    if (!provider.isSessionActive) {
-      _cameraController!.startImageStream((image) => _handleCameraImage(image, camera));
-    }
+    _cameraController!.startImageStream((image) => _handleCameraImage(image, camera));
   }
 
   Future<void> _switchCamera() async {
@@ -133,13 +126,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     setState(() {
       _isSwitchingCamera = true;
     });
-
-    final provider = Provider.of<WorkoutProvider>(context, listen: false);
-    bool wasRecording = _cameraController!.value.isRecordingVideo;
-    
-    if (wasRecording) {
-      await provider.videoService.stopRecording();
-    }
 
     if (_cameraController!.value.isStreamingImages) {
       await _cameraController!.stopImageStream();
@@ -153,19 +139,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     });
 
     await _initCamera();
-    
-    if (wasRecording && _cameraController != null) {
-      if (_cameraController!.value.isStreamingImages) {
-        await _cameraController!.stopImageStream();
-      }
-      final cameras = await availableCameras();
-      final targetDirection = _isFrontCamera ? CameraLensDirection.front : CameraLensDirection.back;
-      final camera = cameras.firstWhere((c) => c.lensDirection == targetDirection, orElse: () => cameras.first);
-      
-      provider.videoService.startRecording(_cameraController!, onAvailable: (image) {
-        _handleCameraImage(image, camera);
-      });
-    }
 
     setState(() {
       _isSwitchingCamera = false;
@@ -270,9 +243,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     _endCurrentExercise();
     final provider = Provider.of<WorkoutProvider>(context, listen: false);
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    
-    String? videoPath = await provider.videoService.stopRecording();
-    await provider.endSession(auth.currentUser!.uid, videoPath: videoPath);
+    await provider.endSession(auth.currentUser!.uid);
     
     if (mounted) {
       Navigator.pop(context);
@@ -280,7 +251,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   double _getPrimaryAngle(Pose pose, String exercise) {
-    if (exercise == "Squat") {
+    if (exercise == "Squat" || exercise == "Lunge" || exercise == "High Knees") {
       return _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftKnee],
@@ -292,15 +263,31 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         pose.landmarks[PoseLandmarkType.leftElbow],
         pose.landmarks[PoseLandmarkType.leftWrist]
       ) ?? 180.0;
+    } else if (exercise == "Jumping Jack") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftHip],
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftWrist]
+      ) ?? 180.0;
+    } else if (exercise == "Plank") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftHip],
+        pose.landmarks[PoseLandmarkType.leftAnkle]
+      ) ?? 180.0;
     }
     return 180.0;
   }
 
   String _getMuscleGroup(String name) {
     switch (name) {
-      case 'Squat': return 'Legs';
+      case 'Squat': 
+      case 'Lunge': return 'Legs';
       case 'Push-Up': return 'Chest';
       case 'Bicep Curl': return 'Arms';
+      case 'Plank': return 'Core';
+      case 'Jumping Jack':
+      case 'High Knees': return 'Cardio';
       default: return 'Full Body';
     }
   }
@@ -325,17 +312,35 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Layer 1: Camera
-          CameraPreview(_cameraController!),
-
-          // Layer 2: Skeleton
-          CustomPaint(
-            painter: SkeletonPainter(
-              poses: _poses,
-              imageSize: Size(_cameraController!.value.previewSize!.height, _cameraController!.value.previewSize!.width),
-              isFront: _isFrontCamera,
-              mode: _skeletonMode,
-            ),
+          // Layer 1 & 2: Camera and Skeleton
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final size = constraints.biggest;
+              var scale = size.aspectRatio * _cameraController!.value.aspectRatio;
+              if (scale < 1) scale = 1 / scale;
+              return Transform.scale(
+                scale: scale,
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio: 1 / _cameraController!.value.aspectRatio,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        CameraPreview(_cameraController!),
+                        CustomPaint(
+                          painter: SkeletonPainter(
+                            poses: _poses,
+                            imageSize: Size(_cameraController!.value.previewSize!.height, _cameraController!.value.previewSize!.width),
+                            isFront: _isFrontCamera,
+                            mode: _skeletonMode,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
 
           // Layer 3: Top HUD
@@ -379,24 +384,8 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             right: 16,
             child: Row(
               children: [
-                if (provider.isSessionActive)
                   Container(
-                    margin: const EdgeInsets.only(right: 8),
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-                    decoration: BoxDecoration(color: Colors.black54, borderRadius: BorderRadius.circular(12)),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 10, height: 10,
-                          decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
-                        ),
-                        const SizedBox(width: 6),
-                        const Text('REC', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 12)),
-                      ],
-                    ),
-                  ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(color: AppTheme.red, borderRadius: BorderRadius.circular(12)),
                   child: Text(
                     '${(provider.elapsedSeconds ~/ 60).toString().padLeft(2, '0')}:${(provider.elapsedSeconds % 60).toString().padLeft(2, '0')}',

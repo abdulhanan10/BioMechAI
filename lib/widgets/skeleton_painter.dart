@@ -52,7 +52,7 @@ class SkeletonPainter extends CustomPainter {
         final lm1 = pose.landmarks[pair[0]];
         final lm2 = pose.landmarks[pair[1]];
 
-        if (lm1 != null && lm2 != null && lm1.likelihood > 0.38 && lm2.likelihood > 0.38) {
+        if (lm1 != null && lm2 != null) {
           double x1 = lm1.x * scaleX;
           double y1 = lm1.y * scaleY;
           double x2 = lm2.x * scaleX;
@@ -67,18 +67,15 @@ class SkeletonPainter extends CustomPainter {
         }
       }
 
-      // Draw joints
       pose.landmarks.forEach((_, landmark) {
-        if (landmark.likelihood > 0.38) {
-          double x = landmark.x * scaleX;
-          double y = landmark.y * scaleY;
+        double x = landmark.x * scaleX;
+        double y = landmark.y * scaleY;
 
-          if (isFront) {
-            x = size.width - x;
-          }
-
-          canvas.drawCircle(Offset(x, y), 4.5, jointPaint);
+        if (isFront) {
+          x = size.width - x;
         }
+
+        canvas.drawCircle(Offset(x, y), 4.5, jointPaint);
       });
     }
   }

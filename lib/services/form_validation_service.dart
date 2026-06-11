@@ -106,10 +106,28 @@ class FormValidationService {
   }
 
   double _getPrimaryAngle(Pose pose, String exercise) {
-    if (exercise == "Squat") {
+    if (exercise == "Squat" || exercise == "Lunge" || exercise == "High Knees") {
       return _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftKnee],
+        pose.landmarks[PoseLandmarkType.leftAnkle]
+      ) ?? 180.0;
+    } else if (exercise == "Push-Up" || exercise == "Bicep Curl") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftElbow],
+        pose.landmarks[PoseLandmarkType.leftWrist]
+      ) ?? 180.0;
+    } else if (exercise == "Jumping Jack") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftHip],
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftWrist]
+      ) ?? 180.0;
+    } else if (exercise == "Plank") {
+      return _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.leftShoulder],
+        pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftAnkle]
       ) ?? 180.0;
     }
