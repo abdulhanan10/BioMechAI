@@ -145,16 +145,16 @@ class RepCounterService {
   bool update(double angle, bool isValid, double score, String exercise) {
     bool repCompleted = false;
     
-    // Quick rep counting thresholds tailored to exercise
-    double downThresh = 135;
-    double upThresh = 155;
+    // Strict rep counting thresholds tailored to exercise to prevent fake reps
+    double downThresh = 110; // Must go deep enough to count as a rep
+    double upThresh = 160;   // Must stand back up
     
     if (exercise == 'Jumping Jack') {
-        downThresh = 60; // Arms go down
-        upThresh = 120;  // Arms go up
+        downThresh = 60; // Arms must go down below T-pose
+        upThresh = 130;  // Arms must go up above T-pose
     } else if (exercise == 'Push-Up' || exercise == 'Bicep Curl') {
-        downThresh = 120;
-        upThresh = 150;
+        downThresh = 100; // Must bend elbows to at least 100 degrees
+        upThresh = 150;   // Must straighten arms
     } else if (exercise == 'Plank') {
         return false; // Planks are held, not counted in reps
     }
