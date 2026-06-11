@@ -8,75 +8,48 @@ app = Flask(__name__)
 CORS(app)
 
 # Load trained model
-MODEL_PATH  = 'models/exercise_classifier.pkl'
-SCALER_PATH = 'models/scaler.pkl'
-ENCODER_PATH= 'models/label_encoder.pkl'
+MODEL_PATH  = 'models/fitness_model.pkl'
 
-model, scaler, le = None, None, None
+model = None
 
 def load_model():
-    global model, scaler, le
+    global model
     try:
-        model  = joblib.load(MODEL_PATH)
-        scaler = joblib.load(SCALER_PATH)
-        le     = joblib.load(ENCODER_PATH)
-        print('Model loaded successfully')
-        print(f'Exercises: {list(le.classes_)}')
+        model = joblib.load(MODEL_PATH)
+        print('Custom fitness model loaded successfully')
     except Exception as e:
         print(f'Model load failed: {e}')
 
 def extract_features(landmarks):
-    """Same feature extraction as training."""
+    """Extracts 21 features to match the synthetic 1050-video model."""
     lm = np.array(landmarks)  # (90, 33, 3)
-
-    def angle(a, b, c):
-        ba = lm[:, a, :2] - lm[:, b, :2]
-        bc = lm[:, c, :2] - lm[:, b, :2]
-        cos = np.sum(ba*bc, axis=1) / (
-            np.linalg.norm(ba, axis=1) *
-            np.linalg.norm(bc, axis=1) + 1e-9)
-        return np.degrees(np.arccos(np.clip(cos, -1, 1)))
-
-    angle_seqs = {
-        'knee_l':     angle(23, 25, 27),
-        'knee_r':     angle(24, 26, 28),
-        'elbow_l':    angle(11, 13, 15),
-        'elbow_r':    angle(12, 14, 16),
-        'hip_l':      angle(11, 23, 25),
-        'hip_r':      angle(12, 24, 26),
-        'shoulder_l': angle(13, 11, 23),
-        'shoulder_r': angle(14, 12, 24),
-    }
-
-    features = []
-    for seq in angle_seqs.values():
-        features.extend([
-            np.mean(seq), np.std(seq),
-            np.min(seq),  np.max(seq),
-            np.max(seq) - np.min(seq),
-        ])
-    for seq in angle_seqs.values():
-        features.append(np.mean(np.abs(np.diff(seq))))
-
-    knee_sym = np.mean(np.abs(
-        angle_seqs['knee_l'] - angle_seqs['knee_r']))
-    shoulder_sym = np.mean(np.abs(
-        angle_seqs['shoulder_l'] - angle_seqs['shoulder_r']))
-    features.extend([knee_sym, shoulder_sym])
-
+    
+    # Scale coordinates to increase std dev to match synthetic 0.0-1.0 range
+    lm = lm * 5.0
+    
+    # wrists: left(15), right(16) -> 6 coords
+    wrists_std = np.std(lm[:, [15, 16], :], axis=0).flatten()
+    # ankles: left(27), right(28) -> 6 coords
+    ankles_std = np.std(lm[:, [27, 28], :], axis=0).flatten()
+    # hips: left(23) -> 3 coords
+    hips_std = np.std(lm[:, 23, :], axis=0).flatten()
+    # elbows: left(13) -> 3 coords
+    elbows_std = np.std(lm[:, 13, :], axis=0).flatten()
+    # knees: left(25) -> 3 coords
+    knees_std = np.std(lm[:, 25, :], axis=0).flatten()
+    
+    features = np.concatenate([wrists_std, ankles_std, hips_std, elbows_std, knees_std])
     return np.array(features).reshape(1, -1)
 
-
 EXERCISE_DISPLAY_NAMES = {
-    'squat':        'Squat',
-    'pushup':       'Push-Up',
-    'jumping_jack': 'Jumping Jack',
-    'bicep_curl':   'Bicep Curl',
-    'lunge':        'Lunge',
-    'plank':        'Plank',
-    'high_knees':   'High Knees',
+    0: 'Squat',
+    1: 'Push-Up',
+    2: 'Jumping Jack',
+    3: 'Lunge',
+    4: 'Bicep Curl',
+    5: 'High Knees',
+    6: 'Plank'
 }
-
 
 @app.route('/classify', methods=['POST'])
 def classify():
@@ -98,23 +71,18 @@ def classify():
 
     try:
         features = extract_features(landmarks)
-        features_scaled = scaler.transform(features)
-        probs = model.predict_proba(features_scaled)[0]
+        probs = model.predict_proba(features)[0]
         top_idx = int(np.argmax(probs))
-        top_label = le.classes_[top_idx]
         confidence = float(probs[top_idx])
 
         top3 = sorted(
-            [{'exercise': EXERCISE_DISPLAY_NAMES.get(
-                  le.classes_[i], le.classes_[i]),
-              'confidence': float(probs[i])}
-             for i in range(len(le.classes_))],
+            [{'exercise': EXERCISE_DISPLAY_NAMES[i], 'confidence': float(probs[i])}
+             for i in range(7)],
             key=lambda x: -x['confidence']
         )[:3]
 
         return jsonify({
-            'exercise':   EXERCISE_DISPLAY_NAMES.get(
-                              top_label, top_label),
+            'exercise':   EXERCISE_DISPLAY_NAMES[top_idx],
             'confidence': confidence,
             'top3':       top3
         })
