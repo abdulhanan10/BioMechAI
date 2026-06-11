@@ -140,8 +140,10 @@ def health():
     })
 
 
+# Call load_model() unconditionally so it executes when gunicorn imports the app
+load_model()
+
 if __name__ == '__main__':
-    load_model()
     print('Starting BioMechAI server on port 5000...')
     print('Find your IP with: ipconfig')
     app.run(host='0.0.0.0', port=5000, debug=False)
