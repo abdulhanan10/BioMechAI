@@ -115,18 +115,30 @@ def classify():
         # Calculate standard deviations for heuristics
         wrist_y_var = (f[1] + f[3]) / 2.0
         ankle_x_var = (f[4] + f[6]) / 2.0
+        ankle_y_var = (f[5] + f[7]) / 2.0
         knee_y_var = (f[13] + f[15]) / 2.0
         hip_y_var = (f[9] + f[11]) / 2.0
+        elbow_y_var = (f[17] + f[19]) / 2.0
+        
+        ankle_var = max(ankle_x_var, ankle_y_var)
         
         predicted_exercise = None
         confidence = 0.95
         
-        if wrist_y_var > 1.5 and ankle_x_var > 0.5:
+        # Relative Heuristics
+        if wrist_y_var > max(knee_y_var, hip_y_var) and wrist_y_var > 1.0:
             predicted_exercise = "Jumping Jack"
-        elif knee_y_var > 1.0 and hip_y_var < 0.8:
+        elif knee_y_var > (hip_y_var * 1.5) and knee_y_var > 0.8:
             predicted_exercise = "High Knees"
-        elif hip_y_var > 0.8 and knee_y_var > 0.8:
-            predicted_exercise = "Squat"
+        elif hip_y_var > 0.5 and knee_y_var > 0.5:
+            # Differentiate Squat vs Lunge: Feet move in lunge, stay planted in squat
+            if ankle_var > 0.4:
+                predicted_exercise = "Lunge"
+            else:
+                predicted_exercise = "Squat"
+        elif elbow_y_var > 0.5 and wrist_y_var < 0.5:
+            # Hands planted, elbows moving
+            predicted_exercise = "Push-Up"
         else:
             probs = model.predict_proba(features)[0]
             top_idx = int(np.argmax(probs))

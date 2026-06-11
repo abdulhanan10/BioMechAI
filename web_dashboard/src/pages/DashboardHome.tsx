@@ -49,14 +49,14 @@ export default function DashboardHome() {
     }
   };
 
-  const totalValidReps = sessions.reduce((acc, s) => acc + (s.validReps || 0), 0);
+  const totalValidReps = sessions.reduce((acc, s) => acc + (s.totalValidReps || 0), 0);
   const avgScore = sessions.length > 0 ? (sessions.reduce((acc, s) => acc + (s.avgFormScore || 0), 0) / sessions.length).toFixed(1) : "0.0";
   const streak = Math.min(sessions.length, 7); // Mock streak
 
   const chartData = sessions.slice(-10).map((s, i) => ({
     name: `S${i+1}`,
     score: s.avgFormScore || 0,
-    reps: s.validReps || 0
+    reps: s.totalValidReps || 0
   }));
 
   const containerVariants = {
