@@ -3,7 +3,7 @@ import { db } from '../firebase';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import { motion } from 'framer-motion';
-import { Target, Activity, Flame, Award, Users } from 'lucide-react';
+import { Target, Activity, Flame, Users } from 'lucide-react';
 
 export default function DashboardHome() {
   const [clients, setClients] = useState<any[]>([]);
@@ -51,7 +51,6 @@ export default function DashboardHome() {
 
   const totalValidReps = sessions.reduce((acc, s) => acc + (s.totalValidReps || 0), 0);
   const avgScore = sessions.length > 0 ? Math.floor(sessions.reduce((acc, s) => acc + (s.avgFormScore || 0), 0) / sessions.length).toFixed(1) : "0.0";
-  const streak = Math.min(sessions.length, 7); // Mock streak
 
   const chartData = sessions.slice(-10).map((s, i) => ({
     name: `S${i+1}`,
