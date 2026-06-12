@@ -87,15 +87,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: _buildStatBox('Today', '${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length}'),
+                        child: _buildStatBox('Today\'s Sessions', '${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length}', Icons.today, Colors.orange),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _buildStatBox('Total', '${_recentSessions.length}'),
+                        child: _buildStatBox('Total Workouts', '${_recentSessions.length}', Icons.fitness_center, Colors.blue),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: _buildStatBox('Avg Score', _recentSessions.isNotEmpty ? '${(_recentSessions.map((s) => s.avgFormScore).reduce((a, b) => a + b) / _recentSessions.length).toInt()}' : '0'),
+                        child: _buildStatBox('Avg Score', _recentSessions.isNotEmpty ? '${(_recentSessions.map((s) => s.avgFormScore).reduce((a, b) => a + b) / _recentSessions.length).toInt()}' : '0', Icons.analytics, Colors.green),
                       ),
                     ],
                   ),
@@ -183,20 +183,29 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildStatBox(String title, String value) {
+  Widget _buildStatBox(String title, String value, IconData icon, Color color) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 4),
       decoration: BoxDecoration(
         color: AppTheme.card2,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.border),
+        border: Border.all(color: color.withOpacity(0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.05),
+            blurRadius: 10,
+            spreadRadius: 2,
+          )
+        ]
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text(title, style: const TextStyle(color: AppTheme.muted, fontSize: 13)),
+          Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
-          Text(value, style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
+          Text(value, style: const TextStyle(color: AppTheme.text, fontSize: 22, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(title, textAlign: TextAlign.center, style: const TextStyle(color: AppTheme.muted, fontSize: 11, fontWeight: FontWeight.w600)),
         ],
       ),
     );

@@ -28,18 +28,25 @@ class FormScoreRing extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          CircularProgressIndicator(
-            value: score / 100,
-            color: ringColor,
-            backgroundColor: AppTheme.border,
-            strokeWidth: 6,
-          ),
-          Text(
-            '${score.toInt()}',
-            style: TextStyle(
+          SizedBox(
+            width: size,
+            height: size,
+            child: CircularProgressIndicator(
+              value: score / 100,
               color: ringColor,
-              fontWeight: FontWeight.bold,
-              fontSize: size * 0.35,
+              backgroundColor: AppTheme.border,
+              strokeWidth: size * 0.1,
+            ),
+          ),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              '${score.toInt()}',
+              style: TextStyle(
+                color: ringColor,
+                fontWeight: FontWeight.bold,
+                fontSize: size * 0.4,
+              ),
             ),
           ),
         ],
