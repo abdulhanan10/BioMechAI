@@ -26,8 +26,8 @@ class SessionDetailScreen extends StatelessWidget {
             Center(
               child: Column(
                 children: [
-                  FormScoreRing(score: session.avgFormScore, size: 100),
-                  const SizedBox(height: 16),
+                  FormScoreRing(score: session.avgFormScore, size: 150),
+                  const SizedBox(height: 24),
                   Text(
                     DateFormat('EEEE, MMM d, yyyy').format(session.sessionDate),
                     style: const TextStyle(color: AppTheme.text, fontSize: 18, fontWeight: FontWeight.bold),

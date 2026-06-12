@@ -84,22 +84,20 @@ class _HomeScreenState extends State<HomeScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: AppTheme.card2,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppTheme.border),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text('Today', style: TextStyle(color: AppTheme.muted)),
-                        const SizedBox(height: 8),
-                        Text('${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length} sessions', style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatBox('Today', '${_recentSessions.where((s) => s.sessionDate.day == DateTime.now().day).length}'),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatBox('Total', '${_recentSessions.length}'),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildStatBox('Avg Score', _recentSessions.isNotEmpty ? '${(_recentSessions.map((s) => s.avgFormScore).reduce((a, b) => a + b) / _recentSessions.length).toInt()}' : '0'),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 24),
                   MiniCalendar(
@@ -182,6 +180,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
             ),
+    );
+  Widget _buildStatBox(String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+      decoration: BoxDecoration(
+        color: AppTheme.card2,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text(title, style: const TextStyle(color: AppTheme.muted, fontSize: 13)),
+          const SizedBox(height: 8),
+          Text(value, style: const TextStyle(color: AppTheme.text, fontSize: 20, fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }

@@ -136,13 +136,17 @@ export default function DashboardHome() {
       </div>
 
       {/* Charts */}
-      {/* Charts */}
       <div className="grid grid-cols-1 gap-8">
         <motion.div variants={itemVariants} className="glass-panel p-6 rounded-2xl">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-            <div className="w-2 h-6 bg-[#00f3ff] rounded-full"></div>
-            Form Progression
-          </h3>
+          <div className="mb-6">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <div className="w-2 h-6 bg-[#00f3ff] rounded-full"></div>
+              Form Progression
+            </h3>
+            <p className="text-sm text-gray-400 mt-2 ml-4">
+              This graph tracks your average form score (0-100) across your most recent sessions. The X-axis represents your sessions chronologically (S1 being the oldest shown, up to S10), and the Y-axis shows the overall form quality calculated by the AI for each session. A rising trend indicates improving technique.
+            </p>
+          </div>
           <div className="h-72">
             {chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">

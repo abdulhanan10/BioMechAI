@@ -54,7 +54,6 @@ export default function ClientListPage() {
               <tr>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-400">Client Name</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-400">Fitness Goal</th>
-                <th className="px-6 py-4 text-sm font-semibold text-gray-400">Streak</th>
                 <th className="px-6 py-4 text-sm font-semibold text-gray-400 text-right">Action</th>
               </tr>
             </thead>
@@ -77,7 +76,6 @@ export default function ClientListPage() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-300">{client.fitnessGoal || 'N/A'}</td>
-                  <td className="px-6 py-4 text-gray-300">🔥 {client.streakCount || 0} days</td>
                   <td className="px-6 py-4 text-right">
                     <ChevronRight className="inline-block text-gray-500 group-hover:text-[#00f3ff] transition-colors" size={20} />
                   </td>
