@@ -181,6 +181,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
     );
+  }
+
   Widget _buildStatBox(String title, String value) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
