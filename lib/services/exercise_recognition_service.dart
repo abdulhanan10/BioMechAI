@@ -151,14 +151,23 @@ class ExerciseRecognitionService {
       var n = pose.landmarks[PoseLandmarkType.nose];
       if (n != null) noseY = n.y;
 
-      var s = pose.landmarks[PoseLandmarkType.leftShoulder];
-      var a = pose.landmarks[PoseLandmarkType.leftAnkle];
-      var h = pose.landmarks[PoseLandmarkType.leftHip];
-      if (s != null && a != null && h != null) {
-          // A person is horizontal (plank/push-up) if their torso is horizontal.
-          // In a lunge, the foot steps out (making body box wide) but torso remains upright.
-          bool torsoHorizontal = (h.y - s.y).abs() < (h.x - s.x).abs() * 1.2;
-          bool bodyHorizontal = (a.y - s.y).abs() < (a.x - s.x).abs() * 1.2;
+      var ls = pose.landmarks[PoseLandmarkType.leftShoulder];
+      var rs = pose.landmarks[PoseLandmarkType.rightShoulder];
+      var lh = pose.landmarks[PoseLandmarkType.leftHip];
+      var rh = pose.landmarks[PoseLandmarkType.rightHip];
+      var la = pose.landmarks[PoseLandmarkType.leftAnkle];
+      var ra = pose.landmarks[PoseLandmarkType.rightAnkle];
+
+      if (ls != null && rs != null && lh != null && rh != null && la != null && ra != null) {
+          double midShoulderX = (ls.x + rs.x) / 2;
+          double midShoulderY = (ls.y + rs.y) / 2;
+          double midHipX = (lh.x + rh.x) / 2;
+          double midHipY = (lh.y + rh.y) / 2;
+          double midAnkleX = (la.x + ra.x) / 2;
+          double midAnkleY = (la.y + ra.y) / 2;
+
+          bool torsoHorizontal = (midHipY - midShoulderY).abs() < (midHipX - midShoulderX).abs() * 1.2;
+          bool bodyHorizontal = (midAnkleY - midShoulderY).abs() < (midAnkleX - midShoulderX).abs() * 1.2;
           
           if (torsoHorizontal && bodyHorizontal) {
              isHorizontal = true;
@@ -181,9 +190,13 @@ class ExerciseRecognitionService {
     double leftArmRaiseRom = maxLeftArmRaise - minLeftArmRaise;
     double rightArmRaiseRom = maxRightArmRaise - minRightArmRaise;
 
-    // Jumping Jack: arms raise significantly (angle > 75 means almost horizontal or above)
-    if ((maxLeftArmRaise > 75 && leftArmRaiseRom > 30) || (maxRightArmRaise > 75 && rightArmRaiseRom > 30)) {
-      return "Jumping Jack";
+    // Jumping Jack: arms raise significantly AND knees remain relatively straight.
+    // If knees are bending deeply (< 130), it's likely a Lunge or Squat with arms moving for balance.
+    bool kneesRelativelyStraight = (minLeftKnee > 130 && minRightKnee > 130);
+    if (kneesRelativelyStraight) {
+        if ((maxLeftArmRaise > 75 && leftArmRaiseRom > 30) || (maxRightArmRaise > 75 && rightArmRaiseRom > 30)) {
+          return "Jumping Jack";
+        }
     }
 
     if (leftElbowRom > 40 || rightElbowRom > 40) {
