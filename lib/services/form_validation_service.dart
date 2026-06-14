@@ -183,65 +183,30 @@ class FormValidationService {
 
   double _getPrimaryAngle(Pose pose, String exercise) {
     if (exercise == "Squat" || exercise == "Lunge") {
-      double leftAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftHip],
-        pose.landmarks[PoseLandmarkType.leftKnee],
-        pose.landmarks[PoseLandmarkType.leftAnkle]
-      ) ?? 180.0;
-      double rightAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.rightHip],
-        pose.landmarks[PoseLandmarkType.rightKnee],
-        pose.landmarks[PoseLandmarkType.rightAnkle]
-      ) ?? 180.0;
-      return min(leftAngle, rightAngle);
+      double? leftAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftKnee], pose.landmarks[PoseLandmarkType.leftAnkle]);
+      double? rightAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee], pose.landmarks[PoseLandmarkType.rightAnkle]);
+      if (leftAngle == null && rightAngle == null) return 180.0;
+      return min(leftAngle ?? 180.0, rightAngle ?? 180.0);
     } else if (exercise == "High Knees") {
-      double leftAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftShoulder],
-        pose.landmarks[PoseLandmarkType.leftHip],
-        pose.landmarks[PoseLandmarkType.leftKnee]
-      ) ?? 180.0;
-      double rightAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.rightShoulder],
-        pose.landmarks[PoseLandmarkType.rightHip],
-        pose.landmarks[PoseLandmarkType.rightKnee]
-      ) ?? 180.0;
-      return min(leftAngle, rightAngle);
+      double? leftAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftKnee]);
+      double? rightAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee]);
+      if (leftAngle == null && rightAngle == null) return 180.0;
+      return min(leftAngle ?? 180.0, rightAngle ?? 180.0);
     } else if (exercise == "Push-Up" || exercise == "Bicep Curl") {
-      double leftAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftShoulder],
-        pose.landmarks[PoseLandmarkType.leftElbow],
-        pose.landmarks[PoseLandmarkType.leftWrist]
-      ) ?? 180.0;
-      double rightAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.rightShoulder],
-        pose.landmarks[PoseLandmarkType.rightElbow],
-        pose.landmarks[PoseLandmarkType.rightWrist]
-      ) ?? 180.0;
-      return min(leftAngle, rightAngle);
+      double? leftAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftElbow], pose.landmarks[PoseLandmarkType.leftWrist]);
+      double? rightAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightElbow], pose.landmarks[PoseLandmarkType.rightWrist]);
+      if (leftAngle == null && rightAngle == null) return 180.0;
+      return min(leftAngle ?? 180.0, rightAngle ?? 180.0);
     } else if (exercise == "Jumping Jack") {
-      double leftAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftHip],
-        pose.landmarks[PoseLandmarkType.leftShoulder],
-        pose.landmarks[PoseLandmarkType.leftWrist]
-      ) ?? 180.0;
-      double rightAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.rightHip],
-        pose.landmarks[PoseLandmarkType.rightShoulder],
-        pose.landmarks[PoseLandmarkType.rightWrist]
-      ) ?? 180.0;
-      return max(leftAngle, rightAngle);
+      double? leftAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftWrist]);
+      double? rightAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightWrist]);
+      if (leftAngle == null && rightAngle == null) return 0.0;
+      return max(leftAngle ?? 0.0, rightAngle ?? 0.0);
     } else if (exercise == "Plank") {
-      double leftAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftShoulder],
-        pose.landmarks[PoseLandmarkType.leftHip],
-        pose.landmarks[PoseLandmarkType.leftAnkle]
-      ) ?? 180.0;
-      double rightAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.rightShoulder],
-        pose.landmarks[PoseLandmarkType.rightHip],
-        pose.landmarks[PoseLandmarkType.rightAnkle]
-      ) ?? 180.0;
-      return min(leftAngle, rightAngle);
+      double? leftAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftAnkle]);
+      double? rightAngle = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightAnkle]);
+      if (leftAngle == null && rightAngle == null) return 180.0;
+      return min(leftAngle ?? 180.0, rightAngle ?? 180.0);
     }
     return 180.0;
   }
