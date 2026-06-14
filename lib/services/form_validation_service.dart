@@ -32,13 +32,108 @@ class FormValidationService {
     List<String> errors = [];
     bool hasHighSeverity = false;
 
-    // Pattern 1: Safety Limits
-    _checkSafetyLimits(pose, exercise, errors, () {
-      score -= 36;
-      hasHighSeverity = true;
-    });
+    void deduct(double amount, String errorMsg, {bool highSeverity = false}) {
+      score -= amount;
+      if (!errors.contains(errorMsg)) errors.add(errorMsg);
+      if (highSeverity) hasHighSeverity = true;
+    }
 
-    // Pattern 2: Smoothness
+    // Unique accuracy rules per exercise
+    switch (exercise) {
+      case "Squat":
+        double? leftKnee = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftKnee],
+            pose.landmarks[PoseLandmarkType.leftAnkle]);
+        if (leftKnee != null && (leftKnee < 45 || leftKnee > 180)) {
+          deduct(20, "Knee angle unsafe", highSeverity: true);
+        }
+        _checkSymmetry(pose, errors, () => deduct(10, "Shoulders uneven"));
+        break;
+
+      case "Lunge":
+        double? leftKnee = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftKnee],
+            pose.landmarks[PoseLandmarkType.leftAnkle]);
+        double? rightKnee = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.rightHip],
+            pose.landmarks[PoseLandmarkType.rightKnee],
+            pose.landmarks[PoseLandmarkType.rightAnkle]);
+        double minKnee = min(leftKnee ?? 180, rightKnee ?? 180);
+        if (minKnee < 50) {
+          deduct(15, "Don't overextend knee");
+        }
+        double? backAngle = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftShoulder],
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftKnee]);
+        if (backAngle != null && backAngle < 130) {
+          deduct(15, "Keep torso upright");
+        }
+        break;
+
+      case "High Knees":
+        double? leftHip = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftShoulder],
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftKnee]);
+        double? rightHip = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.rightShoulder],
+            pose.landmarks[PoseLandmarkType.rightHip],
+            pose.landmarks[PoseLandmarkType.rightKnee]);
+        double minHip = min(leftHip ?? 180, rightHip ?? 180);
+        if (minHip > 130) {
+           deduct(10, "Lift knees higher");
+        }
+        break;
+
+      case "Push-Up":
+        double? bodyAlignment = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftShoulder],
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftAnkle]);
+        if (bodyAlignment != null && (bodyAlignment < 140 || bodyAlignment > 220)) {
+          deduct(25, "Keep body straight", highSeverity: true);
+        }
+        break;
+
+      case "Bicep Curl":
+        double? bodySway = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftShoulder],
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftAnkle]);
+        if (bodySway != null && bodySway < 155) {
+          deduct(15, "Don't swing back");
+        }
+        break;
+
+      case "Jumping Jack":
+        var lw = pose.landmarks[PoseLandmarkType.leftWrist];
+        var rw = pose.landmarks[PoseLandmarkType.rightWrist];
+        if (lw != null && rw != null) {
+          if ((lw.y - rw.y).abs() > 0.30 * 1000) {
+            deduct(10, "Move arms together");
+          }
+        }
+        break;
+
+      case "Plank":
+        double? plankAlignment = _poseService.jointAngle(
+            pose.landmarks[PoseLandmarkType.leftShoulder],
+            pose.landmarks[PoseLandmarkType.leftHip],
+            pose.landmarks[PoseLandmarkType.leftAnkle]);
+        if (plankAlignment != null) {
+          if (plankAlignment < 150) {
+            deduct(25, "Don't let hips sag", highSeverity: true);
+          } else if (plankAlignment > 190) {
+            deduct(15, "Lower your hips");
+          }
+        }
+        break;
+    }
+
+    // Smoothness (Less strict penalty)
     double primaryAngle = _getPrimaryAngle(pose, exercise);
     _angleHistory.add(primaryAngle);
     if (_angleHistory.length > 8) {
@@ -49,22 +144,19 @@ class FormValidationService {
       double mean = _angleHistory.reduce((a, b) => a + b) / 8;
       double variance = _angleHistory.map((a) => pow(a - mean, 2)).reduce((a, b) => a + b) / 8;
       double std = sqrt(variance);
-      score = min(score, max(0, 100 - std * 3.2));
+      score -= std * 1.2; // Much less strict than 3.2
     }
-
-    // Pattern 3: Symmetry
-    _checkSymmetry(pose, errors, () {
-      score -= 8;
-    });
 
     // Final score clamping
     score = score.clamp(0.0, 100.0);
-    bool isValid = score >= 60 && !hasHighSeverity;
+    
+    // Normal threshold for valid rep (was 60, now 45)
+    bool isValid = score >= 45 && !hasHighSeverity;
 
     String feedback = "";
-    if (score >= 86) {
+    if (score >= 80) {
       feedback = "Great $exercise form! 💪";
-    } else if (score >= 72) {
+    } else if (score >= 45) {
       feedback = errors.isNotEmpty ? errors.first : "Good form";
     } else {
       feedback = errors.isNotEmpty ? "Fix: ${errors.first}" : "Improve form";
@@ -76,22 +168,6 @@ class FormValidationService {
       errors: errors,
       feedback: feedback,
     );
-  }
-
-  void _checkSafetyLimits(Pose pose, String exercise, List<String> errors, Function onHighSeverity) {
-    // Basic mock of safety limits
-    if (exercise == "Squat") {
-      double? kneeAngle = _poseService.jointAngle(
-        pose.landmarks[PoseLandmarkType.leftHip],
-        pose.landmarks[PoseLandmarkType.leftKnee],
-        pose.landmarks[PoseLandmarkType.leftAnkle]
-      );
-      if (kneeAngle != null && (kneeAngle < 58 || kneeAngle > 180)) {
-        errors.add("Knee angle out of safety range");
-        onHighSeverity();
-      }
-    }
-    // Implement other exercises per requirements
   }
 
   void _checkSymmetry(Pose pose, List<String> errors, Function onLowSeverity) {
@@ -170,15 +246,15 @@ class RepCounterService {
     bool repCompleted = false;
     
     // Strict rep counting thresholds tailored to exercise to prevent fake reps
-    double downThresh = 110; // Must go deep enough to count as a rep
-    double upThresh = 160;   // Must stand back up
+    double downThresh = 120; // Relaxed: Must go deep enough to count as a rep
+    double upThresh = 150;   // Relaxed: Must stand back up
     
     if (exercise == 'Jumping Jack') {
-        downThresh = 60; // Arms must go down below T-pose
-        upThresh = 130;  // Arms must go up above T-pose
+        downThresh = 75; // Relaxed: Arms must go down
+        upThresh = 120;  // Relaxed: Arms must go up
     } else if (exercise == 'Push-Up' || exercise == 'Bicep Curl') {
-        downThresh = 100; // Must bend elbows to at least 100 degrees
-        upThresh = 150;   // Must straighten arms
+        downThresh = 110; // Relaxed: Bend elbows to 110 degrees
+        upThresh = 140;   // Relaxed: Straighten arms
     } else if (exercise == 'Plank') {
         return false; // Planks are held, not counted in reps
     }
