@@ -99,6 +99,10 @@ class ExerciseRecognitionService {
     double minWristY = 10000, maxWristY = 0;
     double noseY = 0;
     bool isHorizontal = false;
+    bool bothHipsFlexed = false;
+    bool bothKneesFlexed = false;
+    bool oneHipFlexedOneExtended = false;
+    bool oneKneeFlexedOneExtended = false;
 
     for (var poses in _poseService.landmarkBuffer) {
       if (poses.isEmpty) continue;
@@ -121,6 +125,14 @@ class ExerciseRecognitionService {
       
       double? rh = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee]);
       if (rh != null) { minRightHip = min(minRightHip, rh); maxRightHip = max(maxRightHip, rh); }
+
+      // Track simultaneous flexion for legs to distinguish Squat/Lunge/HighKnees
+      if (lk != null && rk != null && lh != null && rh != null) {
+          if (lh < 130 && rh < 130) bothHipsFlexed = true;
+          if (lk < 130 && rk < 130) bothKneesFlexed = true;
+          if ((lh < 120 && rh > 150) || (rh < 120 && lh > 150)) oneHipFlexedOneExtended = true;
+          if ((lk < 120 && rk > 150) || (rk < 120 && lk > 150)) oneKneeFlexedOneExtended = true;
+      }
 
       var lw = pose.landmarks[PoseLandmarkType.leftWrist];
       var rw = pose.landmarks[PoseLandmarkType.rightWrist];
@@ -160,19 +172,22 @@ class ExerciseRecognitionService {
     }
 
     if (leftKneeRom > 25 || rightKneeRom > 25 || leftHipRom > 25 || rightHipRom > 25) {
-      // Squat: Both knees bend and hips bend synchronously
-      if (minLeftKnee < 130 && minRightKnee < 130 && (minLeftKnee - minRightKnee).abs() < 30) {
+      if (bothHipsFlexed && bothKneesFlexed) {
          return "Squat";
       }
-      // High Knees: Hip angle gets very small (< 110)
-      if (minLeftHip < 110 || minRightHip < 110) {
-         return "High Knees";
+      
+      if (oneHipFlexedOneExtended) {
+         if (bothKneesFlexed) {
+             return "Lunge";
+         }
+         if (oneKneeFlexedOneExtended || minLeftHip < 110 || minRightHip < 110) {
+             return "High Knees";
+         }
       }
-      // Lunge: Asymmetric knee bend
-      if ((minLeftKnee < 100 && minRightKnee > 130) || (minRightKnee < 100 && minLeftKnee > 130) || leftKneeRom > 40 || rightKneeRom > 40) {
-         return "Lunge";
-      }
-      if (minLeftKnee < 120 && minRightKnee < 120) return "Squat";
+
+      // Fallbacks
+      if (bothKneesFlexed && (minLeftKnee - minRightKnee).abs() < 30) return "Squat";
+      if (minLeftHip < 110 || minRightHip < 110) return "High Knees";
     }
 
     return "Unknown";
