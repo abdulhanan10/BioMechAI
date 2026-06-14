@@ -6,7 +6,7 @@ class TrainerFeedback {
   final String clientId;
   final String sessionId;
   final String feedbackText;
-  final int videoTimestamp; // seconds
+  final int videoTimestamp; 
   final DateTime createdAt;
 
   TrainerFeedback({

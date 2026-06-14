@@ -9,7 +9,6 @@ class FirebaseService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Authentication
   Future<UserModel?> getCurrentUser() async {
     User? user = _auth.currentUser;
     if (user != null) {
@@ -74,7 +73,6 @@ class FirebaseService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // User Data
   Future<UserModel?> getUserData(String uid) async {
     try {
       DocumentSnapshot doc = await _firestore.collection('users').doc(uid).get();
@@ -93,7 +91,6 @@ class FirebaseService {
     });
   }
 
-  // Workout Sessions
   Future<String> saveWorkoutSession(SessionModel session) async {
     try {
       DocumentReference docRef = _firestore

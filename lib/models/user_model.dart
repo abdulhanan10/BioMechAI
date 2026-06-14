@@ -9,7 +9,7 @@ class UserModel {
   final int age;
   final double bmi;
   final String fitnessGoal;
-  final String role; // 'user' or 'trainer'
+  final String role; 
   final String? profilePhotoUrl;
   final String? contactNumber;
   final DateTime createdAt;

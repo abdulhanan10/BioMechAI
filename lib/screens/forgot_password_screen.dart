@@ -46,8 +46,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Go back to login
+                  Navigator.pop(context); 
+                  Navigator.pop(context); 
                 },
                 child: const Text('OK', style: TextStyle(color: AppTheme.blue)),
               )

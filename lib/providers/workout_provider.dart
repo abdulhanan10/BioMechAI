@@ -76,7 +76,7 @@ class WorkoutProvider extends ChangeNotifier {
       for (var block in exerciseTimeline) {
         totalValidReps += block.validReps;
         totalReps += block.totalReps;
-        totalScore += block.avgFormScore * block.totalReps; // weighted average prep
+        totalScore += block.avgFormScore * block.totalReps; 
       }
 
       double avgFormScore = totalReps > 0 ? totalScore / totalReps : 0;

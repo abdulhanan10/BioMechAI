@@ -1,14 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ExerciseBlock {
-  final String? id; // Document ID if from Firestore
+  final String? id; 
   final String exerciseName;
   final String muscleGroup;
   final String category;
   int totalReps;
   int validReps;
   double avgFormScore;
-  double weightUsed; // 0 = bodyweight
+  double weightUsed; 
   final DateTime startTimestamp;
   DateTime endTimestamp;
 

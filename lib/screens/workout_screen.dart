@@ -40,7 +40,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   double _currentWeight = 0.0;
   String _feedback = "Perform your first rep to begin...";
 
-  // We'll keep track of the exercise block so we can update it
   ExerciseBlock? _currentExerciseBlock;
 
   bool _isFrontCamera = true;
@@ -51,7 +50,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
     super.initState();
     _recognitionService = ExerciseRecognitionService(_poseService);
     
-    // We get height from user
     final auth = Provider.of<AuthProvider>(context, listen: false);
     _validationService = FormValidationService(_poseService, auth.currentUser?.heightCm ?? 175.0);
 
@@ -154,10 +152,9 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       }
     } else {
       if (_recognitionService.confirmedExercise != null) {
-        // Validate form
+        
         final result = _validationService.validate(pose, _recognitionService.confirmedExercise!);
         
-        // Count rep
         double primaryAngle = _getPrimaryAngle(pose, _recognitionService.confirmedExercise!);
         bool repCompleted = _repCounter.update(primaryAngle, result.isValid, result.score, _recognitionService.confirmedExercise!);
 
@@ -193,7 +190,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
           _updateCurrentExerciseBlock();
         }
 
-        // Check if stopped
         _recognitionService.detectExerciseChange(pose);
         if (_recognitionService.exerciseChangeDetected) {
           _endCurrentExercise();
@@ -323,7 +319,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Layer 1 & 2: Camera and Skeleton
+          
           LayoutBuilder(
             builder: (context, constraints) {
               final size = constraints.biggest;
@@ -354,7 +350,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             },
           ),
 
-          // Layer 3: Top HUD
           Positioned(
             top: 40,
             left: 16,
@@ -389,7 +384,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
           ),
 
-          // Layer 4: Timer & REC indicator
           Positioned(
             top: 100,
             right: 16,
@@ -407,7 +401,6 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
             ),
           ),
 
-          // Layer 5: Bottom panel
           Positioned(
             bottom: 0,
             left: 0,

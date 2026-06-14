@@ -5,7 +5,7 @@ class SessionModel {
   final String userId;
   final DateTime startTime;
   final DateTime endTime;
-  final int totalDuration; // in seconds
+  final int totalDuration; 
   final double avgFormScore;
   final int totalValidReps;
   final int totalReps;

@@ -27,13 +27,13 @@ class SkeletonPainter extends CustomPainter {
     Color boneColor;
     switch (mode) {
       case SkeletonMode.detecting:
-        boneColor = const Color(0xFF58A6FF); // blue
+        boneColor = const Color(0xFF58A6FF); 
         break;
       case SkeletonMode.valid:
-        boneColor = const Color(0xFF3FB950); // green
+        boneColor = const Color(0xFF3FB950); 
         break;
       case SkeletonMode.invalid:
-        boneColor = const Color(0xFFF85149); // red
+        boneColor = const Color(0xFFF85149); 
         break;
     }
 
@@ -47,7 +47,7 @@ class SkeletonPainter extends CustomPainter {
       ..color = Colors.white;
 
     for (final pose in poses) {
-      // Draw bones
+      
       for (final pair in kSkeletonPairs) {
         final lm1 = pose.landmarks[pair[0]];
         final lm2 = pose.landmarks[pair[1]];

@@ -38,7 +38,6 @@ class FormValidationService {
       if (highSeverity) hasHighSeverity = true;
     }
 
-    // Unique accuracy rules per exercise
     switch (exercise) {
       case "Squat":
         double? leftKnee = _poseService.jointAngle(
@@ -133,7 +132,6 @@ class FormValidationService {
         break;
     }
 
-    // Smoothness (Less strict penalty)
     double primaryAngle = _getPrimaryAngle(pose, exercise);
     _angleHistory.add(primaryAngle);
     if (_angleHistory.length > 8) {
@@ -144,13 +142,11 @@ class FormValidationService {
       double mean = _angleHistory.reduce((a, b) => a + b) / 8;
       double variance = _angleHistory.map((a) => pow(a - mean, 2)).reduce((a, b) => a + b) / 8;
       double std = sqrt(variance);
-      score -= std * 1.2; // Much less strict than 3.2
+      score -= std * 1.2; 
     }
 
-    // Final score clamping
     score = score.clamp(0.0, 100.0);
     
-    // Normal threshold for valid rep (was 60, now 45)
     bool isValid = score >= 45 && !hasHighSeverity;
 
     String feedback = "";
@@ -174,7 +170,7 @@ class FormValidationService {
     var ls = pose.landmarks[PoseLandmarkType.leftShoulder];
     var rs = pose.landmarks[PoseLandmarkType.rightShoulder];
     if (ls != null && rs != null) {
-      if ((ls.y - rs.y).abs() > 0.20 * 1000) { // Rough heuristic if using raw coords
+      if ((ls.y - rs.y).abs() > 0.20 * 1000) { 
         errors.add("Shoulders are not symmetric");
         onLowSeverity();
       }
@@ -222,18 +218,17 @@ class RepCounterService {
   bool update(double angle, bool isValid, double score, String exercise) {
     bool repCompleted = false;
     
-    // Strict rep counting thresholds tailored to exercise to prevent fake reps
-    double downThresh = 120; // Relaxed: Must go deep enough to count as a rep
-    double upThresh = 150;   // Relaxed: Must stand back up
+    double downThresh = 120; 
+    double upThresh = 150;   
     
     if (exercise == 'Jumping Jack') {
-        downThresh = 45; // Relaxed: Arms down by sides
-        upThresh = 75;   // Relaxed: Arms raise to almost horizontal
+        downThresh = 45; 
+        upThresh = 75;   
     } else if (exercise == 'Push-Up' || exercise == 'Bicep Curl') {
-        downThresh = 110; // Relaxed: Bend elbows to 110 degrees
-        upThresh = 140;   // Relaxed: Straighten arms
+        downThresh = 110; 
+        upThresh = 140;   
     } else if (exercise == 'Plank') {
-        return false; // Planks are held, not counted in reps
+        return false; 
     }
     
     if (_state == 'up' && angle < downThresh) {
@@ -244,7 +239,6 @@ class RepCounterService {
       totalReps++;
       if (isValid) validReps++;
       
-      // Update running average
       avgScore = ((avgScore * (totalReps - 1)) + score) / totalReps;
     }
     return repCompleted;

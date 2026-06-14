@@ -10,9 +10,6 @@ import 'pose_detection_service.dart';
 class ExerciseRecognitionService {
   final PoseDetectionService _poseService;
 
-  // Change this to your local IP address (e.g., 'http://192.168.1.5:5000/classify')
-  // For Android Emulator, use 'http://10.0.2.2:5000/classify'
-  // For testing the deployed app, use 'https://biomechai.onrender.com/classify'
   static const String apiUrl = 'https://biomechai.onrender.com/classify';
 
   String? confirmedExercise;
@@ -22,12 +19,10 @@ class ExerciseRecognitionService {
   bool exerciseChangeDetected = false;
   List<ExerciseBlock> exerciseTimeline = [];
 
-  // For detectFirstRep
   double? _initialKneeAngle;
   double? _initialElbowAngle;
   bool _firstRepDetected = false;
 
-  // For detectExerciseChange
   DateTime? _lastMovementTime;
 
   ExerciseRecognitionService(this._poseService);
@@ -38,19 +33,18 @@ class ExerciseRecognitionService {
 
     for (var poses in buffer) {
       if (poses.isEmpty) {
-        // Pad with zeros if no pose
+        
         result.add(List.generate(33, (_) => [0.0, 0.0, 0.0]));
         continue;
       }
       var pose = poses.first;
       List<List<double>> frameData = [];
       
-      // MLKit Pose landmarks are indexed 0-32
       for (int i = 0; i <= 32; i++) {
         var lmType = PoseLandmarkType.values.firstWhere((e) => e.index == i, orElse: () => PoseLandmarkType.nose);
         var lm = pose.landmarks[lmType];
         if (lm != null) {
-          // Normalize exact coordinates by width and height to match MediaPipe
+          
           frameData.add([lm.x / imageSize.width, lm.y / imageSize.height, lm.z / imageSize.width]); 
         } else {
           frameData.add([0.0, 0.0, 0.0]);
@@ -59,7 +53,6 @@ class ExerciseRecognitionService {
       result.add(frameData);
     }
     
-    // Pad to 90 if less
     while (result.length < 90) {
       result.add(List.generate(33, (_) => [0.0, 0.0, 0.0]));
     }
@@ -72,14 +65,12 @@ class ExerciseRecognitionService {
 
     _updateMovementTime(pose);
 
-    // Trigger classification once we have collected at least 90 frames (approx 3 seconds)
-    // We use a robust local heuristic first to avoid backend misclassifications.
     if (_poseService.landmarkBuffer.length >= 90) {
       _firstRepDetected = true;
       String localGuess = _runLocalHeuristics();
       if (localGuess != "Unknown") {
         confirmedExercise = localGuess;
-        confidence = 0.99; // Highly confident locally
+        confidence = 0.99; 
         isApiOffline = false;
         return;
       }
@@ -131,7 +122,6 @@ class ExerciseRecognitionService {
       double? rh = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee]);
       if (rh != null) { minRightHip = min(minRightHip, rh); maxRightHip = max(maxRightHip, rh); }
 
-      // Track simultaneous flexion for legs to distinguish Squat/Lunge/HighKnees
       if (lk != null && rk != null && lh != null && rh != null) {
           if (lh < 130 && rh < 130) bothHipsFlexed = true;
           if (lk < 130 && rk < 130) bothKneesFlexed = true;
@@ -196,8 +186,7 @@ class ExerciseRecognitionService {
     double rightHipRom = maxRightHip - minRightHip;
 
     if (isHorizontal) {
-      // In a Push-Up, the elbow bends significantly (usually 70+ degrees).
-      // Increased threshold to 50 to prevent pose-jitter during a static Plank from triggering Push-Up.
+      
       if (leftElbowRom > 50 || rightElbowRom > 50) return "Push-Up";
       return "Plank";
     }
@@ -205,8 +194,6 @@ class ExerciseRecognitionService {
     double leftArmRaiseRom = maxLeftArmRaise - minLeftArmRaise;
     double rightArmRaiseRom = maxRightArmRaise - minRightArmRaise;
 
-    // Jumping Jack: arms raise significantly AND knees remain relatively straight.
-    // If knees are bending deeply (< 130), it's likely a Lunge or Squat with arms moving for balance.
     bool kneesRelativelyStraight = (minLeftKnee > 130 && minRightKnee > 130);
     if (kneesRelativelyStraight) {
         if ((maxLeftArmRaise > 75 && leftArmRaiseRom > 30) || (maxRightArmRaise > 75 && rightArmRaiseRom > 30)) {
@@ -232,12 +219,10 @@ class ExerciseRecognitionService {
          }
       }
 
-      // Robust Lunge check for side-facing camera (occlusion)
       if (maxAnkleSpreadRatio > 0.4 && (minLeftKnee < 130 || minRightKnee < 130)) {
          return "Lunge";
       }
 
-      // Fallbacks
       if (bothKneesFlexed && (minLeftKnee - minRightKnee).abs() < 30) return "Squat";
       if (minLeftHip < 110 || minRightHip < 110) return "High Knees";
     }
@@ -269,17 +254,17 @@ class ExerciseRecognitionService {
           confidence = score;
           isApiOffline = false;
         } else {
-          // If low confidence, clear buffer and allow retry instead of locking in
+          
           _poseService.landmarkBuffer.clear();
           _firstRepDetected = false;
         }
       } else {
-        // If server error, clear buffer to allow retry
+        
         _poseService.landmarkBuffer.clear();
         _firstRepDetected = false;
       }
     } catch (e) {
-      // If timeout or network error, clear buffer to allow retry
+      
       _poseService.landmarkBuffer.clear();
       _firstRepDetected = false;
     }
@@ -289,7 +274,7 @@ class ExerciseRecognitionService {
     try {
       http.get(Uri.parse(apiUrl.replaceAll('/classify', '/health'))).timeout(const Duration(seconds: 5)).catchError((_) => http.Response('', 500));
     } catch (e) {
-      // ignore
+      
     }
   }
 
@@ -311,25 +296,22 @@ class ExerciseRecognitionService {
         _initialKneeAngle = null;
         _initialElbowAngle = null;
         confirmedExercise = null;
-        _lastMovementTime = DateTime.now(); // reset
+        _lastMovementTime = DateTime.now(); 
       }
     }
   }
 
   void _updateMovementTime(Pose pose) {
-    // Check if nose is moving to update movement time
+    
     var nose = pose.landmarks[PoseLandmarkType.nose];
     if (nose != null) {
-       // In a real app we would check delta from previous frame.
-       // For now, assume any frame means they are tracking.
-       // If difference is small, we consider it stationary.
-       // Without previous pose tracked, we'll just simplify:
+       
        _lastMovementTime = DateTime.now();
     }
   }
 
   void reset() {
-    pingAPI(); // Wake up Render
+    pingAPI(); 
     exerciseTimeline.clear();
     _poseService.landmarkBuffer.clear();
     confirmedExercise = null;

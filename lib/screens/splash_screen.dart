@@ -31,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Future<void> _checkAuth() async {
     final auth = Provider.of<AuthProvider>(context, listen: false);
-    // Wait for animation
+    
     await Future.delayed(const Duration(seconds: 2));
     
     if (auth.isAuthenticated) {

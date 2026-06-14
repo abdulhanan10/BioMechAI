@@ -129,7 +129,6 @@ class AuthProvider extends ChangeNotifier {
       return 'The email address is badly formatted.';
     }
     
-    // Clean up generic firebase tags
     return errorString.replaceAll(RegExp(r'\[.*?\] '), '').replaceAll('Exception: ', '');
   }
 }
