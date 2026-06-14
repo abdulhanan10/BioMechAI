@@ -160,6 +160,16 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
         double primaryAngle = _getPrimaryAngle(pose, _recognitionService.confirmedExercise!);
         bool repCompleted = _repCounter.update(primaryAngle, result.isValid, result.score, _recognitionService.confirmedExercise!);
 
+        if (_recognitionService.confirmedExercise == "Plank" && _currentExerciseBlock != null) {
+           int secondsHeld = DateTime.now().difference(_currentExerciseBlock!.startTimestamp).inSeconds;
+           if (secondsHeld > _repCounter.totalReps) {
+              _repCounter.totalReps = secondsHeld;
+              if (result.isValid) _repCounter.validReps = secondsHeld;
+              _repCounter.avgScore = ((_repCounter.avgScore * (secondsHeld - 1)) + result.score) / max(1, secondsHeld);
+              _updateCurrentExerciseBlock();
+           }
+        }
+
         if (mounted) {
           setState(() {
             _skeletonMode = result.isValid ? SkeletonMode.valid : SkeletonMode.invalid;
@@ -223,7 +233,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
   }
 
   void _endCurrentExercise() {
-    if (_currentExerciseBlock != null && _currentExerciseBlock!.totalReps > 0) {
+    if (_currentExerciseBlock != null && (_currentExerciseBlock!.totalReps > 0 || _currentExerciseBlock!.exerciseName == "Plank")) {
       Provider.of<WorkoutProvider>(context, listen: false).addExerciseBlock(_currentExerciseBlock!);
     }
     _currentExerciseBlock = null;
