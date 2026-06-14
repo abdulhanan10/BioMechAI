@@ -24,6 +24,31 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         Navigator.pushReplacementNamed(context, AppRoutes.home);
       }
+    } else if (mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          backgroundColor: AppTheme.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.error_outline, color: AppTheme.red),
+              SizedBox(width: 8),
+              Text('Login Failed', style: TextStyle(color: Colors.white)),
+            ],
+          ),
+          content: Text(
+            auth.error ?? 'Invalid email or password',
+            style: const TextStyle(color: AppTheme.text),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK', style: TextStyle(color: AppTheme.blue)),
+            )
+          ],
+        ),
+      );
     }
   }
 
@@ -98,13 +123,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (auth.error != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(color: AppTheme.red.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
-                    child: Text(auth.error!, style: const TextStyle(color: AppTheme.red)),
-                  ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
