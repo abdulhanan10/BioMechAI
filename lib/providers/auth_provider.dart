@@ -41,7 +41,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return _currentUser != null;
     } catch (e) {
-      _error = e.toString();
+      _error = _getFriendlyErrorMessage(e.toString());
       _setLoading(false);
       return false;
     }
@@ -72,7 +72,7 @@ class AuthProvider extends ChangeNotifier {
       _setLoading(false);
       return _currentUser != null;
     } catch (e) {
-      _error = e.toString();
+      _error = _getFriendlyErrorMessage(e.toString());
       _setLoading(false);
       return false;
     }
@@ -90,9 +90,9 @@ class AuthProvider extends ChangeNotifier {
       await _firebaseService.resetPassword(email);
       _setLoading(false);
     } catch (e) {
-      _error = e.toString();
+      _error = _getFriendlyErrorMessage(e.toString(), isReset: true);
       _setLoading(false);
-      rethrow;
+      throw Exception(_error);
     }
   }
 
@@ -114,5 +114,22 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       print('Error reloading user: $e');
     }
+  }
+
+  String _getFriendlyErrorMessage(String errorString, {bool isReset = false}) {
+    if (errorString.contains('invalid-credential') || errorString.contains('wrong-password')) {
+      return isReset ? 'This email is not registered.' : 'Incorrect email or password.';
+    } else if (errorString.contains('user-not-found')) {
+      return 'This email is not registered.';
+    } else if (errorString.contains('email-already-in-use')) {
+      return 'This email is already registered.';
+    } else if (errorString.contains('weak-password')) {
+      return 'The password provided is too weak.';
+    } else if (errorString.contains('invalid-email')) {
+      return 'The email address is badly formatted.';
+    }
+    
+    // Clean up generic firebase tags
+    return errorString.replaceAll(RegExp(r'\[.*?\] '), '').replaceAll('Exception: ', '');
   }
 }
