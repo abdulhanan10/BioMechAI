@@ -151,20 +151,20 @@ class ExerciseRecognitionService {
       var n = pose.landmarks[PoseLandmarkType.nose];
       if (n != null) noseY = n.y;
 
-      var ls = pose.landmarks[PoseLandmarkType.leftShoulder];
-      var rs = pose.landmarks[PoseLandmarkType.rightShoulder];
-      var lh = pose.landmarks[PoseLandmarkType.leftHip];
-      var rh = pose.landmarks[PoseLandmarkType.rightHip];
-      var la = pose.landmarks[PoseLandmarkType.leftAnkle];
-      var ra = pose.landmarks[PoseLandmarkType.rightAnkle];
+      var lShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+      var rShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+      var lHip = pose.landmarks[PoseLandmarkType.leftHip];
+      var rHip = pose.landmarks[PoseLandmarkType.rightHip];
+      var lAnkle = pose.landmarks[PoseLandmarkType.leftAnkle];
+      var rAnkle = pose.landmarks[PoseLandmarkType.rightAnkle];
 
-      if (ls != null && rs != null && lh != null && rh != null && la != null && ra != null) {
-          double midShoulderX = (ls.x + rs.x) / 2;
-          double midShoulderY = (ls.y + rs.y) / 2;
-          double midHipX = (lh.x + rh.x) / 2;
-          double midHipY = (lh.y + rh.y) / 2;
-          double midAnkleX = (la.x + ra.x) / 2;
-          double midAnkleY = (la.y + ra.y) / 2;
+      if (lShoulder != null && rShoulder != null && lHip != null && rHip != null && lAnkle != null && rAnkle != null) {
+          double midShoulderX = (lShoulder.x + rShoulder.x) / 2;
+          double midShoulderY = (lShoulder.y + rShoulder.y) / 2;
+          double midHipX = (lHip.x + rHip.x) / 2;
+          double midHipY = (lHip.y + rHip.y) / 2;
+          double midAnkleX = (lAnkle.x + rAnkle.x) / 2;
+          double midAnkleY = (lAnkle.y + rAnkle.y) / 2;
 
           bool torsoHorizontal = (midHipY - midShoulderY).abs() < (midHipX - midShoulderX).abs() * 1.2;
           bool bodyHorizontal = (midAnkleY - midShoulderY).abs() < (midAnkleX - midShoulderX).abs() * 1.2;
