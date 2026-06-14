@@ -360,7 +360,7 @@ class _WorkoutScreenState extends State<WorkoutScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   decoration: BoxDecoration(color: AppTheme.bg.withOpacity(0.8), borderRadius: BorderRadius.circular(20)),
                   child: Text(
-                    _isDetectingNewExercise ? "Detecting..." : "${_recognitionService.confirmedExercise} (${(_recognitionService.confidence * 100).toInt()}%)",
+                    _isDetectingNewExercise ? "Detecting..." : "${_recognitionService.confirmedExercise}",
                     style: const TextStyle(color: AppTheme.text, fontWeight: FontWeight.bold),
                   ),
                 ),

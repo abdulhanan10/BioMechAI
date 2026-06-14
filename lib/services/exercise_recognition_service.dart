@@ -72,11 +72,109 @@ class ExerciseRecognitionService {
     _updateMovementTime(pose);
 
     // Trigger classification once we have collected at least 90 frames (approx 3 seconds)
-    // This allows the custom model to identify ANY exercise, not just squats/pushups.
+    // We use a robust local heuristic first to avoid backend misclassifications.
     if (_poseService.landmarkBuffer.length >= 90) {
       _firstRepDetected = true;
+      String localGuess = _runLocalHeuristics();
+      if (localGuess != "Unknown") {
+        confirmedExercise = localGuess;
+        confidence = 0.99; // Highly confident locally
+        isApiOffline = false;
+        return;
+      }
       _triggerClassification("Custom Exercise", imageSize);
     }
+  }
+
+  String _runLocalHeuristics() {
+    if (_poseService.landmarkBuffer.isEmpty) return "Unknown";
+    
+    double minLeftKnee = 180, maxLeftKnee = 0;
+    double minRightKnee = 180, maxRightKnee = 0;
+    double minLeftElbow = 180, maxLeftElbow = 0;
+    double minRightElbow = 180, maxRightElbow = 0;
+    double minLeftHip = 180, maxLeftHip = 0;
+    double minRightHip = 180, maxRightHip = 0;
+    double minWristY = 10000, maxWristY = 0;
+    double noseY = 0;
+    bool isHorizontal = false;
+
+    for (var poses in _poseService.landmarkBuffer) {
+      if (poses.isEmpty) continue;
+      var pose = poses.first;
+      
+      double? lk = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftKnee], pose.landmarks[PoseLandmarkType.leftAnkle]);
+      if (lk != null) { minLeftKnee = min(minLeftKnee, lk); maxLeftKnee = max(maxLeftKnee, lk); }
+      
+      double? rk = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee], pose.landmarks[PoseLandmarkType.rightAnkle]);
+      if (rk != null) { minRightKnee = min(minRightKnee, rk); maxRightKnee = max(maxRightKnee, rk); }
+      
+      double? le = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftElbow], pose.landmarks[PoseLandmarkType.leftWrist]);
+      if (le != null) { minLeftElbow = min(minLeftElbow, le); maxLeftElbow = max(maxLeftElbow, le); }
+      
+      double? re = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightElbow], pose.landmarks[PoseLandmarkType.rightWrist]);
+      if (re != null) { minRightElbow = min(minRightElbow, re); maxRightElbow = max(maxRightElbow, re); }
+
+      double? lh = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftKnee]);
+      if (lh != null) { minLeftHip = min(minLeftHip, lh); maxLeftHip = max(maxLeftHip, lh); }
+      
+      double? rh = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightKnee]);
+      if (rh != null) { minRightHip = min(minRightHip, rh); maxRightHip = max(maxRightHip, rh); }
+
+      var lw = pose.landmarks[PoseLandmarkType.leftWrist];
+      var rw = pose.landmarks[PoseLandmarkType.rightWrist];
+      if (lw != null) { minWristY = min(minWristY, lw.y); maxWristY = max(maxWristY, lw.y); }
+      if (rw != null) { minWristY = min(minWristY, rw.y); maxWristY = max(maxWristY, rw.y); }
+      
+      var n = pose.landmarks[PoseLandmarkType.nose];
+      if (n != null) noseY = n.y;
+
+      var s = pose.landmarks[PoseLandmarkType.leftShoulder];
+      var a = pose.landmarks[PoseLandmarkType.leftAnkle];
+      if (s != null && a != null) {
+          if ((a.y - s.y).abs() < (a.x - s.x).abs() * 1.5) {
+             isHorizontal = true;
+          }
+      }
+    }
+
+    double leftKneeRom = maxLeftKnee - minLeftKnee;
+    double rightKneeRom = maxRightKnee - minRightKnee;
+    double leftElbowRom = maxLeftElbow - minLeftElbow;
+    double rightElbowRom = maxRightElbow - minRightElbow;
+    double leftHipRom = maxLeftHip - minLeftHip;
+    double rightHipRom = maxRightHip - minRightHip;
+
+    if (isHorizontal) {
+      if (leftElbowRom > 30 || rightElbowRom > 30) return "Push-Up";
+      return "Plank";
+    }
+
+    if (minWristY < noseY && (maxWristY - minWristY) > 200) {
+      return "Jumping Jack";
+    }
+
+    if (leftElbowRom > 40 || rightElbowRom > 40) {
+      if (leftKneeRom < 25 && rightKneeRom < 25) return "Bicep Curl";
+    }
+
+    if (leftKneeRom > 25 || rightKneeRom > 25 || leftHipRom > 25 || rightHipRom > 25) {
+      // Squat: Both knees bend and hips bend synchronously
+      if (minLeftKnee < 130 && minRightKnee < 130 && (minLeftKnee - minRightKnee).abs() < 30) {
+         return "Squat";
+      }
+      // High Knees: Hip angle gets very small (< 110)
+      if (minLeftHip < 110 || minRightHip < 110) {
+         return "High Knees";
+      }
+      // Lunge: Asymmetric knee bend
+      if ((minLeftKnee < 100 && minRightKnee > 130) || (minRightKnee < 100 && minLeftKnee > 130) || leftKneeRom > 40 || rightKneeRom > 40) {
+         return "Lunge";
+      }
+      if (minLeftKnee < 120 && minRightKnee < 120) return "Squat";
+    }
+
+    return "Unknown";
   }
 
   void _triggerClassification(String heuristicFallback, Size imageSize) async {
