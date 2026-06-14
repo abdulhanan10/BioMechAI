@@ -107,29 +107,53 @@ class FormValidationService {
 
   double _getPrimaryAngle(Pose pose, String exercise) {
     if (exercise == "Squat" || exercise == "Lunge" || exercise == "High Knees") {
-      return _poseService.jointAngle(
+      double leftAngle = _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftKnee],
         pose.landmarks[PoseLandmarkType.leftAnkle]
       ) ?? 180.0;
+      double rightAngle = _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.rightHip],
+        pose.landmarks[PoseLandmarkType.rightKnee],
+        pose.landmarks[PoseLandmarkType.rightAnkle]
+      ) ?? 180.0;
+      return min(leftAngle, rightAngle);
     } else if (exercise == "Push-Up" || exercise == "Bicep Curl") {
-      return _poseService.jointAngle(
+      double leftAngle = _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftShoulder],
         pose.landmarks[PoseLandmarkType.leftElbow],
         pose.landmarks[PoseLandmarkType.leftWrist]
       ) ?? 180.0;
+      double rightAngle = _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.rightShoulder],
+        pose.landmarks[PoseLandmarkType.rightElbow],
+        pose.landmarks[PoseLandmarkType.rightWrist]
+      ) ?? 180.0;
+      return min(leftAngle, rightAngle);
     } else if (exercise == "Jumping Jack") {
-      return _poseService.jointAngle(
+      double leftAngle = _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftShoulder],
         pose.landmarks[PoseLandmarkType.leftWrist]
       ) ?? 180.0;
+      double rightAngle = _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.rightHip],
+        pose.landmarks[PoseLandmarkType.rightShoulder],
+        pose.landmarks[PoseLandmarkType.rightWrist]
+      ) ?? 180.0;
+      return max(leftAngle, rightAngle);
     } else if (exercise == "Plank") {
-      return _poseService.jointAngle(
+      double leftAngle = _poseService.jointAngle(
         pose.landmarks[PoseLandmarkType.leftShoulder],
         pose.landmarks[PoseLandmarkType.leftHip],
         pose.landmarks[PoseLandmarkType.leftAnkle]
       ) ?? 180.0;
+      double rightAngle = _poseService.jointAngle(
+        pose.landmarks[PoseLandmarkType.rightShoulder],
+        pose.landmarks[PoseLandmarkType.rightHip],
+        pose.landmarks[PoseLandmarkType.rightAnkle]
+      ) ?? 180.0;
+      return min(leftAngle, rightAngle);
     }
     return 180.0;
   }
