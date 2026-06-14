@@ -227,8 +227,8 @@ class RepCounterService {
     double upThresh = 150;   // Relaxed: Must stand back up
     
     if (exercise == 'Jumping Jack') {
-        downThresh = 75; // Relaxed: Arms must go down
-        upThresh = 120;  // Relaxed: Arms must go up
+        downThresh = 45; // Relaxed: Arms down by sides
+        upThresh = 75;   // Relaxed: Arms raise to almost horizontal
     } else if (exercise == 'Push-Up' || exercise == 'Bicep Curl') {
         downThresh = 110; // Relaxed: Bend elbows to 110 degrees
         upThresh = 140;   // Relaxed: Straighten arms

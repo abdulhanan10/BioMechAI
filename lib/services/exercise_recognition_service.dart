@@ -103,6 +103,9 @@ class ExerciseRecognitionService {
     bool bothKneesFlexed = false;
     bool oneHipFlexedOneExtended = false;
     bool oneKneeFlexedOneExtended = false;
+    
+    double minLeftArmRaise = 180, maxLeftArmRaise = 0;
+    double minRightArmRaise = 180, maxRightArmRaise = 0;
 
     for (var poses in _poseService.landmarkBuffer) {
       if (poses.isEmpty) continue;
@@ -134,6 +137,12 @@ class ExerciseRecognitionService {
           if ((lk < 120 && rk > 150) || (rk < 120 && lk > 150)) oneKneeFlexedOneExtended = true;
       }
 
+      double? lArmRaise = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftWrist]);
+      if (lArmRaise != null) { minLeftArmRaise = min(minLeftArmRaise, lArmRaise); maxLeftArmRaise = max(maxLeftArmRaise, lArmRaise); }
+      
+      double? rArmRaise = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.rightHip], pose.landmarks[PoseLandmarkType.rightShoulder], pose.landmarks[PoseLandmarkType.rightWrist]);
+      if (rArmRaise != null) { minRightArmRaise = min(minRightArmRaise, rArmRaise); maxRightArmRaise = max(maxRightArmRaise, rArmRaise); }
+
       var lw = pose.landmarks[PoseLandmarkType.leftWrist];
       var rw = pose.landmarks[PoseLandmarkType.rightWrist];
       if (lw != null) { minWristY = min(minWristY, lw.y); maxWristY = max(maxWristY, lw.y); }
@@ -163,7 +172,11 @@ class ExerciseRecognitionService {
       return "Plank";
     }
 
-    if (minWristY < noseY && (maxWristY - minWristY) > 200) {
+    double leftArmRaiseRom = maxLeftArmRaise - minLeftArmRaise;
+    double rightArmRaiseRom = maxRightArmRaise - minRightArmRaise;
+
+    // Jumping Jack: arms raise significantly (angle > 75 means almost horizontal or above)
+    if ((maxLeftArmRaise > 75 && leftArmRaiseRom > 30) || (maxRightArmRaise > 75 && rightArmRaiseRom > 30)) {
       return "Jumping Jack";
     }
 
