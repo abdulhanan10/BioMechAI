@@ -106,6 +106,8 @@ class ExerciseRecognitionService {
     
     double minLeftArmRaise = 180, maxLeftArmRaise = 0;
     double minRightArmRaise = 180, maxRightArmRaise = 0;
+    
+    double maxAnkleSpreadRatio = 0;
 
     for (var poses in _poseService.landmarkBuffer) {
       if (poses.isEmpty) continue;
@@ -135,6 +137,17 @@ class ExerciseRecognitionService {
           if (lk < 130 && rk < 130) bothKneesFlexed = true;
           if ((lh < 120 && rh > 150) || (rh < 120 && lh > 150)) oneHipFlexedOneExtended = true;
           if ((lk < 120 && rk > 150) || (rk < 120 && lk > 150)) oneKneeFlexedOneExtended = true;
+      }
+      
+      var la = pose.landmarks[PoseLandmarkType.leftAnkle];
+      var ra = pose.landmarks[PoseLandmarkType.rightAnkle];
+      var ls = pose.landmarks[PoseLandmarkType.leftShoulder];
+      if (la != null && ra != null && ls != null) {
+          double spread = (la.x - ra.x).abs();
+          double heightProxy = (la.y - ls.y).abs();
+          if (heightProxy > 0) {
+              maxAnkleSpreadRatio = max(maxAnkleSpreadRatio, spread / heightProxy);
+          }
       }
 
       double? lArmRaise = _poseService.jointAngle(pose.landmarks[PoseLandmarkType.leftHip], pose.landmarks[PoseLandmarkType.leftShoulder], pose.landmarks[PoseLandmarkType.leftWrist]);
@@ -215,6 +228,11 @@ class ExerciseRecognitionService {
          if (oneKneeFlexedOneExtended || minLeftHip < 110 || minRightHip < 110) {
              return "High Knees";
          }
+      }
+
+      // Robust Lunge check for side-facing camera (occlusion)
+      if (maxAnkleSpreadRatio > 0.4 && (minLeftKnee < 130 || minRightKnee < 130)) {
+         return "Lunge";
       }
 
       // Fallbacks
