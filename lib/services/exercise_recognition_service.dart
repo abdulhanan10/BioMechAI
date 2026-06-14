@@ -153,8 +153,14 @@ class ExerciseRecognitionService {
 
       var s = pose.landmarks[PoseLandmarkType.leftShoulder];
       var a = pose.landmarks[PoseLandmarkType.leftAnkle];
-      if (s != null && a != null) {
-          if ((a.y - s.y).abs() < (a.x - s.x).abs() * 1.5) {
+      var h = pose.landmarks[PoseLandmarkType.leftHip];
+      if (s != null && a != null && h != null) {
+          // A person is horizontal (plank/push-up) if their torso is horizontal.
+          // In a lunge, the foot steps out (making body box wide) but torso remains upright.
+          bool torsoHorizontal = (h.y - s.y).abs() < (h.x - s.x).abs() * 1.2;
+          bool bodyHorizontal = (a.y - s.y).abs() < (a.x - s.x).abs() * 1.2;
+          
+          if (torsoHorizontal && bodyHorizontal) {
              isHorizontal = true;
           }
       }
