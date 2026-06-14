@@ -196,7 +196,9 @@ class ExerciseRecognitionService {
     double rightHipRom = maxRightHip - minRightHip;
 
     if (isHorizontal) {
-      if (leftElbowRom > 30 || rightElbowRom > 30) return "Push-Up";
+      // In a Push-Up, the elbow bends significantly (usually 70+ degrees).
+      // Increased threshold to 50 to prevent pose-jitter during a static Plank from triggering Push-Up.
+      if (leftElbowRom > 50 || rightElbowRom > 50) return "Push-Up";
       return "Plank";
     }
 
