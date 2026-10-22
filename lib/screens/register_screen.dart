@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
 import '../utils/app_theme.dart';
+import '../utils/validators.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -29,6 +30,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (_passCtrl.text != _confirmPassCtrl.text) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
+    }
+
+    if (!_isTrainer) {
+      final error = Validators.validateBodyDetails(
+        height: _heightCtrl.text,
+        weight: _weightCtrl.text,
+        age: _ageCtrl.text,
+      );
+      if (error != null) {
+        if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(error)));
+        return;
+      }
     }
     final auth = Provider.of<AuthProvider>(context, listen: false);
     
