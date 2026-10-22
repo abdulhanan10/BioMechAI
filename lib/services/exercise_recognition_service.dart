@@ -1,3 +1,4 @@
+import '../utils/pose_constants.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
@@ -65,7 +66,7 @@ class ExerciseRecognitionService {
 
     _updateMovementTime(pose);
 
-    if (_poseService.landmarkBuffer.length >= 90) {
+    if (_poseService.landmarkBuffer.length >= kLandmarkBufferSize) {
       _firstRepDetected = true;
       String localGuess = _runLocalHeuristics();
       if (localGuess != "Unknown") {
