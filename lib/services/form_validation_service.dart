@@ -212,6 +212,7 @@ class RepCounterService {
   String _state = 'up';
   int totalReps = 0;
   int validReps = 0;
+  int rejectedReps = 0;
   double avgScore = 0;
   List<dynamic> repHistory = [];
 
@@ -235,9 +236,13 @@ class RepCounterService {
       _state = 'down';
     } else if (_state == 'down' && angle > upThresh) {
       _state = 'up';
+      if (!isValid) {
+        rejectedReps++;
+        return false;
+      }
       repCompleted = true;
       totalReps++;
-      if (isValid) validReps++;
+      validReps++;
       
       avgScore = ((avgScore * (totalReps - 1)) + score) / totalReps;
     }
@@ -248,6 +253,7 @@ class RepCounterService {
     _state = 'up';
     totalReps = 0;
     validReps = 0;
+    rejectedReps = 0;
     avgScore = 0;
     repHistory.clear();
   }
