@@ -31,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match')));
       return;
     }
+
     if (!_isTrainer) {
       final error = Validators.validateBodyDetails(
         height: _heightCtrl.text,
