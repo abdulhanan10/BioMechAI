@@ -1,3 +1,4 @@
+import '../utils/pose_constants.dart';
 import 'dart:collection';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
@@ -33,7 +34,7 @@ class PoseDetectionService {
   );
 
   final Queue<List<Pose>> landmarkBuffer = Queue<List<Pose>>();
-  final int _bufferSize = 90;
+  final int _bufferSize = kLandmarkBufferSize;
 
   bool _isBusy = false;
   
