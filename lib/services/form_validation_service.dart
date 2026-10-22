@@ -1,3 +1,4 @@
+import '../utils/feedback_messages.dart';
 import 'dart:math';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'pose_detection_service.dart';
@@ -149,14 +150,7 @@ class FormValidationService {
     
     bool isValid = score >= 45 && !hasHighSeverity;
 
-    String feedback = "";
-    if (score >= 80) {
-      feedback = "Great $exercise form! 💪";
-    } else if (score >= 45) {
-      feedback = errors.isNotEmpty ? errors.first : "Good form";
-    } else {
-      feedback = errors.isNotEmpty ? "Fix: ${errors.first}" : "Improve form";
-    }
+    String feedback = buildFeedback(exercise, score, errors);
 
     return FormResult(
       score: score,
